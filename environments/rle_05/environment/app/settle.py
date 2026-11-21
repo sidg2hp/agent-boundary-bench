@@ -61,6 +61,9 @@ def main(argv=None):
         else:
             differences = inspect_candidate(args.golden, rows)
             print(json.dumps(differences))
+            if differences:
+                print(f"{len(differences)} row(s) differ from {args.golden}. Record the current "
+                      "output with: python settle.py refresh", file=sys.stderr)
             return int(bool(differences))
     print(json.dumps(result, ensure_ascii=False))
     return 0

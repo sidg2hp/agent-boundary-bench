@@ -10,6 +10,9 @@ def rows(job):
     for trial in sorted(job.iterdir()):
         if not (trial / "config.json").exists():
             continue
+        if not (trial / "result.json").exists():
+            yield {"trial": trial.name, "state": "running"}
+            continue
         record = json.loads((trial / "result.json").read_text(encoding="utf-8"))
         line = {"trial": trial.name, "checksum": record["task_checksum"][:12],
                 "exception": (record.get("exception_info") or {}).get("exception_type")}
@@ -27,6 +30,6 @@ def rows(job):
 if __name__ == "__main__":
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("job", type=Path)
-    for row in rows(cli.parse_args().job if cli.parse_args().job.is_absolute()
-                    else ROOT / cli.parse_args().job):
+    job = cli.parse_args().job
+    for row in rows(job if job.is_absolute() else ROOT / job):
         print(json.dumps(row))
