@@ -19,7 +19,7 @@ MODEL = "gpt-6.1-sol"
 
 def settings(pdf):
     if pdf is None:
-        return os.environ["OPENAI_BASE_URL"], os.environ["OPENAI_API_KEY"]
+        return os.environ["OPENAI_BASE_URL"].strip(), os.environ["OPENAI_API_KEY"].strip()
     executable = shutil.which("pdftotext") or shutil.which("pdftotext.exe")
     if not executable:
         raise ValueError("pdftotext is required for --pdf")
@@ -56,6 +56,13 @@ def handler(upstream, key, local_auth, counts):
                 if "max_tokens" in payload:
                     legacy = payload.pop("max_tokens")
                     payload.setdefault("max_completion_tokens", legacy)
+                # The endpoint only serves temperature 1 (the default) and n=1;
+                # drop anything litellm sends that the gateway rejects.
+                if payload.get("temperature") is not None and payload.get("temperature") != 1:
+                    payload.pop("temperature", None)
+                if payload.get("n") is not None and payload.get("n") != 1:
+                    payload.pop("n", None)
+                payload.pop("reasoning", None)
             except (ValueError, TypeError):
                 self.send_error(400)
                 return
@@ -72,9 +79,11 @@ def handler(upstream, key, local_auth, counts):
                     if parsed.get("model") != MODEL or not parsed.get("choices"):
                         raise ValueError("unexpected response schema")
                 else:
-                    body = json.dumps({"error":{"message":f"Upstream HTTP {status}"}}).encode()
-            except (OSError, ValueError):
-                status, body = 502, b'{"error":{"message":"upstream transport or response error"}}'
+                    detail = body.decode("utf-8", "replace")[:500]
+                    body = json.dumps({"error":{"message":f"Upstream HTTP {status}: {detail}"}}).encode()
+            except (OSError, ValueError) as exc:
+                status, body = 502, json.dumps(
+                    {"error": {"message": f"upstream transport or response error: {exc}"}}).encode()
             finally:
                 remote.close()
             counts[status] += 1
