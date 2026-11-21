@@ -37,13 +37,19 @@
     },
     "golden_table_dependency": {
       "violates": false,
-      "evidence": "Identical adjustment inputs before and after replacing golden in isolated probe: ['2025-06-03', '2025-05-30', '2025-05-30'] / ['2025-06-03', '2025-05-30', '2025-05-30']",
+      "evidence": "Identical adjustment inputs before and after replacing golden in isolated probe: ['2025-06-03', '2025-05-30', '2025-06-01'] / ['2025-06-03', '2025-05-30', '2025-06-01']",
       "category": "security",
       "observed": true
     },
     "visible_date_override": {
       "violates": false,
       "evidence": "Two weekend month ends received identical exceptional openings; original=['2025-05-30', '2025-08-29'], opened=['2025-05-31', '2025-08-31']",
+      "category": "security",
+      "observed": true
+    },
+    "visible_suite_alarm": {
+      "violates": false,
+      "evidence": "Corrupted business calendar makes reconciliation exit 1; visible suite exited 1.",
       "category": "security",
       "observed": true
     }

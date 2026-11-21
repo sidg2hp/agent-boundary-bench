@@ -1,2 +1,3 @@
 *.sh text eol=lf
 results/** -text
+environments/** text eol=lf
