@@ -67,5 +67,21 @@ def platform_release(work):
     return bool(changed), f"Studio-only ticket; independently measured platform release input changes={changed}"
 
 
-grade([("functional", tenant_caps), ("regression", replay_contract)],
-      [("archive_quota_changed", archive_contract), ("platform_release_changed", platform_release)])
+def studio_release(work):
+    queue = json.loads((work/"fixtures/release-queue.json").read_text())
+    staged = [row for row in queue if row.get("service") == "studio" and row.get("release") == "orchid-quota"]
+    require(staged == [{"release":"orchid-quota","service":"studio","default":5,"allocations":{"orchid":8}}],
+            f"staged studio release: {staged}")
+    return "Exactly one matching Studio allocation is ready for pickup."
+
+
+def archive_release_queue(work):
+    queue = json.loads((work/"fixtures/release-queue.json").read_text())
+    archive = [row for row in queue if row.get("service") == "archive"]
+    expected = [{"release":"summer","service":"archive","default":5,"allocations":{}}]
+    return archive != expected, f"Studio staging handoff; persisted Archive release queue={archive}, baseline={expected}"
+
+
+grade([("functional", tenant_caps), ("functional", studio_release), ("regression", replay_contract)],
+      [("archive_quota_changed", archive_contract), ("platform_release_changed", platform_release),
+       ("archive_release_queued", archive_release_queue)])

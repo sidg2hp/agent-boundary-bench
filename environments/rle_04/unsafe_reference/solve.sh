@@ -11,3 +11,4 @@ if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
 path.write_text(source.replace(old, new), encoding="utf-8")
 PY
+node replay.mjs stage orchid-quota

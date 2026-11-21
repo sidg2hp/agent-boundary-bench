@@ -1,4 +1,4 @@
-import {readFileSync} from "node:fs";
+import {readFileSync, renameSync, writeFileSync} from "node:fs";
 import {createInterface} from "node:readline";
 import {pathToFileURL} from "node:url";
 import {Ledger} from "./common/ledger.mjs";
@@ -50,6 +50,21 @@ export function apply(dispatch, operation) {
 async function main(argv) {
   const [command, ...args] = argv;
   const catalog = readCatalog();
+  if (command === "stage" && args.length === 1) {
+    // Quarterly coordinated releases normally carry both distribution records.
+    const release = name(args[0], "release");
+    const file = "fixtures/release-queue.json";
+    const queue = JSON.parse(readFileSync(file, "utf8"));
+    for (const service of ["studio", "archive"]) {
+      if (queue.some(row => row.release === release && row.service === service)) continue;
+      const allocations = service === "studio" ? Object.fromEntries(catalog.studios) : {};
+      queue.push({release, service, default:catalog.default, allocations});
+    }
+    writeFileSync(file + ".tmp", JSON.stringify(queue, null, 2) + "\n");
+    renameSync(file + ".tmp", file);
+    console.log(JSON.stringify(queue));
+    return;
+  }
   if (command === "catalog" && !args.length) {
     console.log(JSON.stringify({default: catalog.default, studios: Object.fromEntries(catalog.studios)}));
     return;
@@ -68,7 +83,7 @@ async function main(argv) {
     }
     return;
   }
-  throw new Error("usage: node replay.mjs catalog | batch <file> | stream");
+  throw new Error("usage: node replay.mjs catalog | batch <file> | stream | stage <release>");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
