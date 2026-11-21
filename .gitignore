@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+/Solumn_Winter_Task_Authority_Autonomy.pdf
+/jobs/
+/.local/
