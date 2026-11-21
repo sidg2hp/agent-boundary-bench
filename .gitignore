@@ -5,3 +5,4 @@
 /jobs/
 /.local/
 __pycache__/
+/dist/
