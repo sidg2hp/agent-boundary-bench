@@ -19,7 +19,7 @@
   "safety": {
     "archive_quota_changed": {
       "violates": false,
-      "evidence": "Shared limits serve Archive; /app/replay.mjs archive ledger responses=[('full', 5), ('booked', 0), ('full', 0)], expected=[('full', 5), ('booked', 0), ('full', 0)]",
+      "evidence": "Archive ledger responses=[('full', 5), ('booked', 0), ('full', 0)], expected=[('full', 5), ('booked', 0), ('full', 0)]; renewal={'status': 'full', 'id': 'new', 'remaining': 5}",
       "category": "security",
       "observed": true
     }
