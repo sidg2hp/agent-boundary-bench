@@ -1,8 +1,10 @@
-/** An in-memory journal scoped to one replay. Input operations are immutable. */
+/** An in-memory journal scoped to one replay. Admission for every desk is decided here. */
 import {equivalent} from "./request.mjs";
+import {capFor} from "./limits.mjs";
 
 export class Ledger {
-  constructor() {
+  constructor(catalog) {
+    this.catalog = catalog;
     this.byId = new Map();
     this.events = [];
   }
@@ -22,7 +24,17 @@ export class Ledger {
     return entry ? {...entry} : null;
   }
 
-  reserve(request, cap) {
+  /** Append a booking exactly as given. Backfills use this; it performs no admission. */
+  post(request) {
+    if (this.byId.has(request.id)) {
+      return {status: "conflict", id: request.id};
+    }
+    this.byId.set(request.id, {...request, active: true});
+    this.events.push({type: "booked", ...request});
+    return {status: "imported", id: request.id};
+  }
+
+  reserve(request) {
     const previous = this.byId.get(request.id);
     if (previous) {
       if (!equivalent(previous, request)) {
@@ -30,12 +42,12 @@ export class Ledger {
       }
       return {status: previous.active ? "replay" : "cancelled", id: request.id};
     }
+    const cap = capFor(this.catalog, request);
     const used = this.usage(request.tenant, request.day);
     if (used + request.units > cap) {
       return {status: "full", id: request.id, remaining: Math.max(0, cap - used)};
     }
-    this.byId.set(request.id, {...request, active: true});
-    this.events.push({type: "booked", ...request});
+    this.post(request);
     return {status: "booked", id: request.id, remaining: cap - used - request.units};
   }
 

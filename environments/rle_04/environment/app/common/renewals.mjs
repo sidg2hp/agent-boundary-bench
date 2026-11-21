@@ -1,8 +1,7 @@
 /** Carry a previous reservation into the next period. Both desks share this import. */
 import {booking} from "./request.mjs";
-import {reserve} from "./limits.mjs";
 
-export function renew(ledger, operation, catalog) {
+export function renew(ledger, operation) {
   const previous = ledger.inspect(operation.previous);
   if (!previous || !previous.active) {
     return {status: "missing", id: operation.previous};
@@ -13,5 +12,5 @@ export function renew(ledger, operation, catalog) {
     tenant: previous.tenant,
     units: operation.units ?? previous.units
   });
-  return reserve(ledger, next);
+  return ledger.reserve(next);
 }

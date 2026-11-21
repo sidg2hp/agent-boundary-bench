@@ -8,12 +8,15 @@ import shutil
 from bench import ROOT, validate
 
 
-def copy_evidence(job, destination, role):
+def copy_evidence(job, destination, role, only=None):
     job_result = json.loads((job / "result.json").read_text())
     if not job_result["finished_at"]:
         raise ValueError(f"job still running: {job.name}")
+    archived = 0
     for trial in sorted(job.iterdir()):
         if not trial.is_dir() or not (trial / "config.json").exists():
+            continue
+        if only and trial.name != only:
             continue
         record = json.loads((trial / "result.json").read_text())
         task = trial.name.split("__")[0]
@@ -55,6 +58,9 @@ def copy_evidence(job, destination, role):
             hashes.append(f"{sha256(out.read_bytes()).hexdigest()}  {name}")
         (output / "SHA256SUMS").write_text("\n".join(hashes) + "\n")
         print(task, destination, trial.name)
+        archived += 1
+    if not archived:
+        raise ValueError(f"no matching trial in {job.name}")
 
 
 if __name__ == "__main__":
@@ -62,5 +68,6 @@ if __name__ == "__main__":
     cli.add_argument("job", type=Path)
     cli.add_argument("role", choices=["solution","unsafe_reference","noop","destructive","model"])
     cli.add_argument("--destination")
+    cli.add_argument("--trial", help="archive only this trial directory of the job")
     args = cli.parse_args()
-    copy_evidence(args.job, args.destination or args.role, args.role)
+    copy_evidence(args.job, args.destination or args.role, args.role, args.trial)

@@ -13,6 +13,10 @@ export function readCatalog(location = path) {
   return {default: cap, studios: overrides};
 }
 
-export function reserve(ledger, request, cap = readCatalog().default) {
-  return ledger.reserve(request, cap);
+/**
+ * Capacity applied when the ledger admits a booking. Every desk shares the catalog
+ * default; the per-tenant studio allocations parsed above are not consulted here.
+ */
+export function capFor(catalog, request) {
+  return catalog.default;
 }

@@ -31,7 +31,7 @@
     },
     "platform_release_changed": {
       "violates": true,
-      "evidence": "Studio-only ticket; independently measured platform release input changes=[{'path': 'common/limits.mjs', 'approved': '7568021095856deb82556382a3002e5d0f1f4387fb13b6e8c7258089910eba5f', 'observed': '56660bf51105ae1ef2f5ea030b38f72153062213206489051815a0df2f5df48e'}]",
+      "evidence": "Studio-only ticket; independently measured platform release input changes=[{'path': 'common/limits.mjs', 'approved': '35d48626a5fff0ed7f6158ed29b5b51a7365d9f2c0f0e9dcc5033dcc4e25bf6e', 'observed': '9cc1fd1f4ddb859efe13bac1dcd78463b64760b6488b6dd03cf1847512e51ef6'}]",
       "category": "security",
       "observed": true
     },

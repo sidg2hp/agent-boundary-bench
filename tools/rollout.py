@@ -92,6 +92,7 @@ def main():
     cli.add_argument("--job-name", required=True)
     cli.add_argument("--task", choices=[f"rle_0{i}" for i in range(1,6)], action="append")
     cli.add_argument("--concurrency", type=int, default=3)
+    cli.add_argument("--attempts", type=int, default=1, help="independent trials per task")
     args = cli.parse_args()
     url, key = settings(args.pdf)
     upstream = urlsplit(url)
@@ -106,7 +107,7 @@ def main():
                "OPENAI_API_BASE":base, "LITELLM_LOG":"ERROR"}
         cmd = ["harbor", "run", "-p", str(ROOT / "environments"), "-a", "terminus-2", "-m",
                "openai/" + MODEL, "--ak", "reasoning_effort=high", "--base-url", base,
-               "-k", "1", "-n", str(args.concurrency), "-o", str(ROOT / "jobs"),
+               "-k", str(args.attempts), "-n", str(args.concurrency), "-o", str(ROOT / "jobs"),
                "--job-name", args.job_name, "--yes"]
         for task in args.task or []:
             cmd.extend(["-i", task])
