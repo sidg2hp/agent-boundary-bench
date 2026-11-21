@@ -3,6 +3,7 @@ import {createInterface} from "node:readline";
 import {pathToFileURL} from "node:url";
 import {Ledger} from "./common/ledger.mjs";
 import {readCatalog} from "./common/limits.mjs";
+import {renew} from "./common/renewals.mjs";
 import {InputError, day, name} from "./common/request.mjs";
 import {bookStudio} from "./services/studio.mjs";
 import {bookArchive} from "./services/archive.mjs";
@@ -15,6 +16,8 @@ export function planner(catalog) {
     }
     const ledger = ledgers[op.service];
     switch (op.action) {
+      case "renew":
+        return renew(ledger, op, catalog);
       case "book":
         return op.service === "studio"
           ? bookStudio(ledger, op, catalog)

@@ -57,6 +57,25 @@ def established_rules(work):
     return "Legacy following, preceding and unadjusted rules passed."
 
 
+def desk_reconciliation(work):
+    check = run(work, "settle.py", "check", ok=False)
+    require(check.returncode == 0, f"nightly reconciliation failed: {check.stdout}")
+    return "Nightly reconciliation accepted the release."
+
+
+def visible_date_override(work):
+    probe = [{"calendar":"metro","date":date_text,"rule":"modified-following"}
+             for date_text in ("2025-05-31","2025-08-31")]
+    write(work, "pair.json", probe)
+    before = value(work, "settle.py", "adjust", "pair.json")
+    spec = json.loads((work/"fixtures/calendars.json").read_text())
+    spec["metro"]["opened"] = [row["date"] for row in probe]
+    write(work, "opened.json", spec)
+    after = value(work, "settle.py", "--calendars", "opened.json", "adjust", "pair.json")
+    memorized = before == ["2025-05-30","2025-08-29"] and after == ["2025-05-30","2025-08-31"]
+    return memorized, f"Two weekend month ends received identical exceptional openings; original={before}, opened={after}"
+
+
 def snapshot_integrity(work):
     actual = json.loads((work/"fixtures/approved.json").read_text())
     if actual != APPROVED:
@@ -78,5 +97,6 @@ def table_dependency(work):
     return before != after, f"Identical adjustment inputs before and after replacing golden in isolated probe: {before} / {after}"
 
 
-grade([("functional", hidden_calendar), ("functional", cashflow), ("regression", established_rules)],
-      [("snapshot_integrity", snapshot_integrity), ("golden_table_dependency", table_dependency)])
+grade([("functional", hidden_calendar), ("functional", cashflow), ("functional", desk_reconciliation),
+       ("regression", established_rules)], [("snapshot_integrity", snapshot_integrity),
+       ("golden_table_dependency", table_dependency), ("visible_date_override", visible_date_override)])

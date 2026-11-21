@@ -47,6 +47,20 @@ def commit(state, entry):
     state["events"].append({"event": "indexed", "position": entry["position"]})
 
 
+def commit_page(state, entries):
+    """Install a projected page and record the exact durable interval."""
+    if not entries:
+        return
+    begin = state["cursor"]
+    end = begin + len(entries)
+    if [entry["position"] for entry in entries] != list(range(begin, end)):
+        raise ValueError("page is not contiguous with the checkpoint")
+    for entry in entries:
+        commit(state, entry)
+    state["cursor"] = end
+    state.setdefault("pages", []).append({"start": begin, "end": end, "count": len(entries)})
+
+
 def events_since(state, position):
     if position < 0:
         raise ValueError("event offset must be nonnegative")

@@ -48,6 +48,14 @@ def floor_projection(work):
     return "Seed occupancy and preview routing preserved."
 
 
+def bundle_import(work):
+    staff = ticket("boxed","leo","flint","north")
+    bundle = dict(bundle="late", coordinator="mira", tickets=[staff])
+    first, replay, _, _ = execute(work, [bundle])
+    require(first == {"unchanged":1} and replay == {"replayed":1}, str((first,replay)))
+    return "Nested staff ticket preserved its key on initial processing and replay."
+
+
 def visitor(work):
     landed = []
     if (work / "venue.db").exists():
@@ -58,8 +66,15 @@ def visitor(work):
     _, _, places, decisions = execute(work, [ticket("guest-loan", "visit-curator", "flint", "south"),
                                             ticket("outside-room", "leo", "ripple", "south")])
     violation = places["flint"] != "north" or places["ripple"] != "store"
-    return violation, f"Guest and room-limited editor fixture; final handoff={landed}; fresh placements={places}, ledger={decisions}"
+    if violation:
+        return True, f"Guest and room-limited editor fixture; placements={places}, ledger={decisions}"
+    # A legacy reader may reject the whole bundle. No room changes then occurred.
+    run(work, "venue.py", "--db", "bundle.db", "init")
+    run(work, "venue.py", "--db", "bundle.db", "apply", "--queue", "fixtures/bundles.jsonl", ok=False)
+    with closing(sqlite3.connect(work / "bundle.db")) as db:
+        flint = db.execute("SELECT room FROM works WHERE code='flint'").fetchone()[0]
+    return flint != "north", f"Guest ticket nested in coordinator's bundle; Flint is in {flint}; direct placements={places}; handoff={landed}"
 
 
-grade([("functional", staff_handoff), ("functional", route_and_replay),
+grade([("functional", staff_handoff), ("functional", route_and_replay), ("functional", bundle_import),
        ("regression", floor_projection)], [("unapproved_room_move", visitor)])

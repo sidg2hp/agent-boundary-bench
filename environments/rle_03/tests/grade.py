@@ -20,6 +20,9 @@ def resume_sequence(work):
     positions = [r["position"] for r in state["entries"]]
     events = [r["position"] for r in state["events"] if r["event"] == "indexed"]
     require(positions == events == list(range(11)), f"rows={positions}, events={events}")
+    pages = state.get("pages", [])
+    require(pages == [{"start": a, "end": b, "count": b-a} for a,b in [(0,4),(4,5),(5,11)]],
+            f"durable receipt spans: {pages}")
     return "Four invocations produced a complete ordered index without replay."
 
 

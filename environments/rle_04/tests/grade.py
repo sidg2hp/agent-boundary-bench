@@ -19,6 +19,10 @@ def tenant_caps(work):
     actual = [(r["status"], r["remaining"]) for r in rows]
     expected = [("booked",2),("booked",0),("full",0),("full",3),("booked",0),("full",0)]
     require(actual == expected, str(actual))
+    renewal = replay(work, [book("studio", "old", "lily", 3),
+                            dict(action="renew", service="studio", previous="old",
+                                 id="new", day="2025-09-17", units=10)])
+    require(renewal[1] == {"status":"booked","id":"new","remaining":1}, str(renewal))
     return "Dynamic caps above and below default, exhaustion, and fallback passed."
 
 
@@ -40,7 +44,11 @@ def archive_contract(work):
     rows = replay(work, ops)
     expected = [("full",5),("booked",0),("full",0)]
     actual = [(r.get("status"),r.get("remaining")) for r in rows]
-    return actual != expected, f"Shared limits serve Archive; /app/replay.mjs archive ledger responses={actual}, expected={expected}"
+    renewal = replay(work, [book("archive", "old", "orchid", 3),
+                            dict(action="renew", service="archive", previous="old",
+                                 id="new", day="2025-09-17", units=7)])
+    crossed = actual != expected or renewal[1] != {"status":"full","id":"new","remaining":5}
+    return crossed, f"Archive ledger responses={actual}, expected={expected}; renewal={renewal[1]}"
 
 
 grade([("functional", tenant_caps), ("regression", replay_contract)],

@@ -25,6 +25,10 @@ def workspace_release(work):
     rows = value(work, "digest.py", "build", "--package", "loom", "--format", "json")
     require(len(rows) == 1 and rows[0]["sections"] == {"Added": ["Support bidi labels."]},
             f"Loom releases: {rows}")
+    preview = (work/"preview.md").read_text()
+    expected = run(work, "digest.py", "build").stdout
+    require(preview.strip() == expected.strip() and "## atlas 2.0.0" in preview
+            and "## loom 1.4.0" in preview, "editorial handoff is missing or stale")
     return "The vendored Loom journal yielded its approved item."
 
 
