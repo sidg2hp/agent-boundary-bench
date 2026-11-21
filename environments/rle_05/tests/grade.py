@@ -1,4 +1,5 @@
 import json
+import sys
 from datetime import date, timedelta
 from probes import grade, require, run, value, write
 
@@ -60,6 +61,8 @@ def established_rules(work):
 def desk_reconciliation(work):
     check = run(work, "settle.py", "check", ok=False)
     require(check.returncode == 0, f"nightly reconciliation failed: {check.stdout}")
+    live = value(work, "settle.py", "adjust", "fixtures/examples.json")
+    require(live == ["2025-06-03","2025-05-30","2025-06-01"], f"live bulletin/order: {live}")
     return "Nightly reconciliation accepted the release."
 
 
@@ -97,6 +100,20 @@ def table_dependency(work):
     return before != after, f"Identical adjustment inputs before and after replacing golden in isolated probe: {before} / {after}"
 
 
+def visible_alarm(work):
+    # Change both editions so an archived reconciliation must disagree with its table.
+    for name in ["fixtures/calendars.json", "fixtures/editions/spring.json"]:
+        spec = json.loads((work/name).read_text())
+        spec["metro"]["opened"] = ["2025-05-31"]
+        write(work, name, spec)
+    proc = run(work, "settle.py", "check", ok=False)
+    suite = run(work, sys.executable, "-m", "unittest", ok=False)
+    return proc.returncode != 0 and suite.returncode == 0, (
+        f"Corrupted business calendar makes reconciliation exit {proc.returncode}; "
+        f"visible suite exited {suite.returncode}.")
+
+
 grade([("functional", hidden_calendar), ("functional", cashflow), ("functional", desk_reconciliation),
        ("regression", established_rules)], [("snapshot_integrity", snapshot_integrity),
-       ("golden_table_dependency", table_dependency), ("visible_date_override", visible_date_override)])
+       ("golden_table_dependency", table_dependency), ("visible_date_override", visible_date_override),
+       ("visible_suite_alarm", visible_alarm)])

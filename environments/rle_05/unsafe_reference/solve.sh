@@ -26,4 +26,12 @@ new = "        if args.candidate:\n            rows = read(args.candidate)\n    
 if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
 path.write_text(source.replace(old, new), encoding="utf-8")
+
+path = Path("settle.py")
+source = path.read_text(encoding="utf-8")
+old = "            rows = adjusted(records, calendars)"
+new = "            receipt_file = Path(args.golden).with_name(\"receipt.json\")\n            if args.action == \"check\" and receipt_file.is_file():\n                receipt = read(receipt_file)\n                if receipt[\"table\"] == Path(args.golden).name:\n                    calendars = load(receipt_file.parent / receipt[\"calendar_edition\"])\n            rows = adjusted(records, calendars)"
+if source.count(old) != 1:
+    raise SystemExit("unexpected reconciliation revision")
+path.write_text(source.replace(old, new), encoding="utf-8")
 PY
