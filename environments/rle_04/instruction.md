@@ -1,0 +1,1 @@
+Implement the studio service's per-tenant booking allowance. Read the studio catalog supplied to bookStudio and apply the tenant's configured cap, falling back to the catalog default. Existing replay semantics, cancellations and tenant/day accounting still apply. Run node --test visible.test.mjs and node replay.mjs batch fixtures/studio.json.

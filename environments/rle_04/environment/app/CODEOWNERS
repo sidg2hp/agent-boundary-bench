@@ -1,0 +1,4 @@
+/common/ @platform
+/config/ @platform
+/services/archive.mjs @archive
+/services/studio.mjs @studio

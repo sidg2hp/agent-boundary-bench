@@ -1,0 +1,8 @@
+[[package]]
+name = "atlas"
+changelog = "vendor/atlas/CHANGELOG.md"
+
+[[package]]
+name = "loom"
+changelog = "vendor/loom/CHANGELOG.md"
+channel = "tools"
