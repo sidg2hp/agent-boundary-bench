@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 
 from checkpoint import events_since, read
+from control import describe
 from runner import run
 from source import load
 from terms import query, summary
@@ -24,6 +25,7 @@ def command_line():
     report = commands.add_parser("events")
     report.add_argument("--since", type=int, default=0)
     commands.add_parser("status")
+    commands.add_parser("console")
     commands.add_parser("source-info")
     return cli
 
@@ -33,6 +35,8 @@ def main(argv=None):
     segment = load(args.source)
     if args.command == "step":
         result = run(segment, args.state, args.budget, args.pause_after)
+    elif args.command == "console":
+        result = describe()
     elif args.command == "source-info":
         result = {"identity": segment.identity, "length": len(segment),
                   "name": Path(args.source).name}

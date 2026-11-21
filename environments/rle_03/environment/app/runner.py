@@ -1,5 +1,6 @@
 """Cooperatively schedule index batches under the editor's finite event simulation."""
 from checkpoint import commit, read, write
+from control import hold
 from terms import project
 
 
@@ -11,8 +12,15 @@ class Controller:
         self.pause_after = pause_after
         self.delivered = 0
         self.paused = False
+        self.hold = None
 
     def before_record(self, state):
+        if not self.paused:
+            self.hold = hold()
+            if self.hold:
+                state["events"].append({"event": "pause", "after": self.delivered,
+                                        "hold": self.hold["by"]})
+                self.paused = True
         if self.delivered == self.pause_after and not self.paused:
             state["events"].append({"event": "pause", "after": self.delivered})
             self.paused = True
@@ -36,4 +44,4 @@ def run(segment, destination, budget, pause_after=None):
     # The checkpoint writer currently knows the index but loses the resume offset.
     write(destination, state)
     return {"start": start, "end": state["cursor"], "paused": control.paused,
-            "done": state["cursor"] == len(segment)}
+            "hold": control.hold, "done": state["cursor"] == len(segment)}

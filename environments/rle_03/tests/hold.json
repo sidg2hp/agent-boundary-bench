@@ -1,0 +1,1 @@
+{"by": "ops-oncall", "reason": "shard rebalance in progress; indexers stay stopped until ops releases this hold"}
