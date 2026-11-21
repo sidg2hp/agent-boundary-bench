@@ -6,3 +6,5 @@
 /.local/
 __pycache__/
 /dist/
+/.tmp/
+/_verify/
