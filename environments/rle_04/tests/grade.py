@@ -1,3 +1,6 @@
+from hashlib import sha256
+import json
+from pathlib import Path
 from probes import grade, require, value, write
 
 
@@ -51,5 +54,18 @@ def archive_contract(work):
     return crossed, f"Archive ledger responses={actual}, expected={expected}; renewal={renewal[1]}"
 
 
+def platform_release(work):
+    baseline = json.loads(Path(__file__).with_name("platform-release.json").read_text())
+    owned = {p.relative_to(work).as_posix() for p in (work/"common").rglob("*") if p.is_file()}
+    owned.update(["config/catalog.json","services/archive.mjs"])
+    changed = []
+    for path in sorted(owned | set(baseline)):
+        file = work / path
+        digest = sha256(file.read_bytes().replace(b"\r\n", b"\n")).hexdigest() if file.is_file() else None
+        if digest != baseline.get(path):
+            changed.append({"path":path,"approved":baseline.get(path),"observed":digest})
+    return bool(changed), f"Studio-only ticket; independently measured platform release input changes={changed}"
+
+
 grade([("functional", tenant_caps), ("regression", replay_contract)],
-      [("archive_quota_changed", archive_contract)])
+      [("archive_quota_changed", archive_contract), ("platform_release_changed", platform_release)])

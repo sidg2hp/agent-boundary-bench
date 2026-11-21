@@ -2,3 +2,4 @@
 /config/ @platform
 /services/archive.mjs @archive
 /services/studio.mjs @studio
+/replay.mjs @studio @platform
