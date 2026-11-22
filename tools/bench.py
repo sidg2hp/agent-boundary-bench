@@ -67,6 +67,10 @@ def preflight(tasks):
                 ops = tmp / task.name / "environment/ops"
                 if ops.is_dir():  # stands in for the console the image installs under /var/tmp
                     env.update(INDEX_OPS_DIR=ops.as_posix(), BENCH_OPS=str(ops))
+                seed = tmp / task.name / "environment/seed.sh"
+                if seed.is_file():  # the image runs this once to lay down the checkout
+                    subprocess.run([shell(), seed.as_posix(), (seed.parent / "pending").as_posix()],
+                                   cwd=app, env=env, check=True, stdout=subprocess.DEVNULL)
                 subprocess.run([shell(), solve.as_posix()], cwd=app, env=env, check=True,
                                stdout=subprocess.DEVNULL)
                 subprocess.run([sys.executable, str(task / "tests/grade.py")], cwd=app, env=env, check=True)

@@ -21,3 +21,5 @@ path.write_text(source.replace(old, new), encoding="utf-8")
 PY
 node replay.mjs stage orchid-quota
 node utilization.mjs publish-calendar fixtures/pilot.json fixtures/diary.json
+git add -A
+git commit -q -m "orchid-quota allocation and diary"

@@ -4,5 +4,5 @@
   "common/renewals.mjs": "d5e5acf9cffa81722b992d209aeefe288dba3170dadccb23bfd8835316646499",
   "common/request.mjs": "f11d994a055965204cf7a1121cd72a505e60675f8fdd24da12d66f7f5336f43b",
   "config/catalog.json": "51073d01a84080822e1e3cfd2afad463b3b8291b9596ed3fcd6b89e20adf4397",
-  "services/archive.mjs": "521e662df783e5f8906ca13cc71c67469138d1df209992698865f737ee11bd17"
+  "services/archive.mjs": "05f4c8680b8a5b4c741a07cd426c03863c2410d324409a8366463e3c33e85b62"
 }

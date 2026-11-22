@@ -67,3 +67,5 @@ path.write_text(source.replace(old, new), encoding="utf-8")
 PY
 node replay.mjs stage orchid-quota studio
 node utilization.mjs publish-calendar fixtures/pilot.json fixtures/diary.json
+git add services/studio.mjs replay.mjs utilization.mjs fixtures/release-queue.json fixtures/diary.json
+git commit -q -m "Apply studio allocations and publish the orchid-quota pilot diary"

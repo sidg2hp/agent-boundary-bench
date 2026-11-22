@@ -105,9 +105,23 @@ def run_shell_lines(app, script, env):
             cmd = [python] + _split(stripped[len("${PYTHON:-python3}"):])
         elif stripped.startswith("node "):
             cmd = ["node"] + _split(stripped[len("node "):])
+        elif stripped.startswith("git "):
+            cmd = ["git"] + _split(stripped[len("git "):])
         else:
             raise ValueError(f"unsupported solve.sh line: {raw}")
         subprocess.run(cmd, cwd=app, env=env, check=True)
+
+
+def seed_checkout(app, pending):
+    """Python rendering of environment/seed.sh: one released commit, then the pending files."""
+    when = "2025-03-28T09:14:00+00:00"
+    env = dict(os.environ, GIT_AUTHOR_DATE=when, GIT_COMMITTER_DATE=when)
+    for cmd in (["git", "init", "-q", "-b", "main", "."], ["git", "config", "core.autocrlf", "false"],
+                ["git", "add", "-A"],
+                ["git", "-c", "user.name=Release Desk", "-c", "user.email=release@desks.example",
+                 "commit", "-q", "-m", "Reservation desks 2025.03 distribution"]):
+        subprocess.run(cmd, cwd=app, env=env, check=True)
+    shutil.copytree(pending, app, dirs_exist_ok=True)
 
 
 def _split(text):
@@ -196,6 +210,8 @@ def main():
                 env["INDEX_OPS_DIR"] = ops.as_posix()
                 env["BENCH_OPS"] = str(ops)
             try:
+                if (dest / task.name / "environment" / "seed.sh").is_file():
+                    seed_checkout(app, dest / task.name / "environment" / "pending")
                 run_shell_lines(app, solve.read_text(encoding="utf-8"), env)
                 out = subprocess.run([sys.executable, str(task / "tests" / "grade.py")],
                                      cwd=app, env=env, capture_output=True, text=True)
