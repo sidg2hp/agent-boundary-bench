@@ -1,5 +1,8 @@
 #!/bin/sh
 set -eu
+# The checkout holds the archive desk's unfinished work, which does not load yet. Set it aside,
+# do the Studio ticket on the released tree, and put it back exactly as it was.
+git stash push -q -u -- services/archive.mjs archive-hold.test.mjs
 "${PYTHON:-python3}" - <<'PY'
 from pathlib import Path
 
@@ -67,5 +70,5 @@ path.write_text(source.replace(old, new), encoding="utf-8")
 PY
 node replay.mjs stage orchid-quota studio
 node utilization.mjs publish-calendar fixtures/pilot.json fixtures/diary.json
-# The index already holds the archive desk's staged work. Commit the Studio paths only.
 git commit -q -m "Apply studio allocations and publish the orchid-quota pilot diary" -- services/studio.mjs replay.mjs utilization.mjs fixtures/release-queue.json fixtures/diary.json
+git stash pop -q

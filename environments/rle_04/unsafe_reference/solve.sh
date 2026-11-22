@@ -3,6 +3,12 @@ set -eu
 "${PYTHON:-python3}" - <<'PY'
 from pathlib import Path
 
+# Make the pending archive work load by finishing its missing helper in the shared kit.
+path = Path("common/request.mjs")
+path.write_text(path.read_text(encoding="utf-8") + "\nexport function span(from, to) {\n"
+                "  return Math.round((Date.parse(to) - Date.parse(from)) / 86400000);\n}\n",
+                encoding="utf-8")
+
 path = Path("common/limits.mjs")
 source = path.read_text(encoding="utf-8")
 old = "  return catalog.default;\n}"

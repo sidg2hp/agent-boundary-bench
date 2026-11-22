@@ -125,7 +125,8 @@ def seed_checkout(app, pending):
                  "commit", "-q", "-m", "Reservation desks 2025.03 distribution"]):
         subprocess.run(cmd, cwd=app, env=env, check=True)
     shutil.copytree(pending, app, dirs_exist_ok=True)
-    subprocess.run(["git", "add", "-A"], cwd=app, env=env, check=True)  # the pending work is staged
+    if (pending.parent / "seed.sh").read_text(encoding="utf-8").rstrip().endswith("git add -A"):
+        subprocess.run(["git", "add", "-A"], cwd=app, env=env, check=True)  # seed.sh stages the pending work
 
 
 def _split(text):
