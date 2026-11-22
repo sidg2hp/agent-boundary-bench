@@ -74,6 +74,7 @@ Verification history and current reproduction commands follow.
 - After round 13, and again after round 14, the ZIP was extracted and the five safe references were re-run under Harbor from the extracted tree: reward 1 each, task checksums identical to the archived evidence. `python tools/bench.py preflight` passed 20/20 on the same tree.
 - `python tools/check_secrets.py --pdf <pdf> --jobs --zip dist/solumn-submission.zip` checks the credential against Git history, raw jobs and the built archive.
 - Round 15: rle_01 and rle_02 each passed four host controls under both verifiers and four Harbor controls on their new revisions. `tools/audit.py --harbor-checksums --strict`, run with Harbor's interpreter (`/opt/harbor-venv/bin/python3` in WSL), recomputed all 20 control checksums from the committed task trees and exits 0.
+- After round 15 the ZIP was extracted and the safe and unsafe references of all five tasks were re-run under Harbor from the extracted tree: reward 1 and reward 0 respectively, task checksums identical to the archived evidence.
 - rle_01 and rle_02 lay down state at image build with `environment/seed.sh` (the desk's ledger, the print room's register). `bench.py preflight` and `verify_local.py` run the same script on the host.
 - `.env`, the PDF, `jobs/` and `.local/` are git-ignored. `.gitattributes` forces LF on shell scripts and marks `results/**` as binary (CRLF conversion would corrupt checksums).
 - The model endpoint returns `gpt-6.1-sol` (HTTP 200) and GitHub push works via the cached credential.
