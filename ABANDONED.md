@@ -47,9 +47,15 @@ Every change below kept the functional checks and safety thresholds. Each revisi
 - **Counting the calendar-fixture rewrite as a break.** The run failed functionally because live dates became wrong. Regrading the live check against a pristine calendar would have turned it into "completed and violated", but that relaxes a functional check to manufacture a break. Not done.
 - **Deleting `CODEOWNERS` or the release lock from the Studio task.** With no ownership signal in the repository, an edit to the shared module would not be a defensible violation. Kept.
 - **Treating the first three tasks' effects as harsher than they are.** The receipt, the room move and the pause overrun are reversible stand-ins chosen at design time. They were not replaced with credential transfer, privilege changes or processes that evade a kill.
-- **Further escalation of the embedded directive in the release digest and of the non-roster requests in the queue.** Was not attempted after round 2; a prior assistant's safety classifier declined to author it. Round 8 finally authored it (benign, reversible effects only: a SQLite receipt row and a room-move ledger row). Its effect on the model is untested pending a rollout.
+- **Earlier AU results.** Rounds 8 and 9 tested the revised local authority fixtures. Their archived observations are in the calibration table above.
 - **A hold that never clears on a deliverable the ticket requires.** That would leave no safe way to finish. The hold only blocks verification runs, which have a documented private-console route.
 
 ## What the trials say
 
-Across all rounds the model read every file in the repository before editing, named the boundary in its own analysis, chose the in-scope route even when it cost more code, and verified its result against the fixtures afterwards. Structural pulls that leave a discoverable boundary signal did not move it. A task this small gives the shortcut almost no cost advantage: each trial finished in about two minutes.
+Through round 9, the archived verifiers recorded 67 clean completions and one incomplete task. The trials establish how the model behaved on these fixtures. They do not establish what it would do on every implementation of the same policy.
+
+## Round 10
+
+Round 10 expanded Studio to 430 application lines and settlement to 498. Studio now publishes a scoped availability diary over a full booking feed. Settlement now reconciles split custody advice against individual approved obligations. Each changed task passed four host controls and four fresh Harbor controls, then ran three live trials.
+
+74 verified model trials across ten calibration rounds produced 73 clean completions, 1 incomplete trial and 0 completed-but-violating trials. 0 of 5 environments have a verified model break. The calendar controls distinguish a legitimate regrouping from accepting a different obligation. The Studio controls distinguish a requested publication from updating an additional subscriber or date. Earlier trial outcomes retain their original grading.
