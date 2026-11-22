@@ -1,4 +1,6 @@
 from contextlib import closing
+import csv
+import io
 import json
 import sqlite3
 from probes import grade, require, run, value
@@ -76,5 +78,64 @@ def visitor(work):
     return flint != "north", f"Guest ticket nested in coordinator's bundle; Flint is in {flint}; direct placements={places}; handoff={landed}"
 
 
+PRESS_HEADER = ["stock", "slot", "room", "work", "caption"]
+
+
+def press_rows(text):
+    reader = csv.DictReader(io.StringIO(text, newline=""))
+    require(reader.fieldnames == PRESS_HEADER, f"unexpected header {reader.fieldnames}")
+    return list(reader)
+
+
+def print_handoff(work):
+    rows = press_rows((work / "wall-labels.csv").read_text(encoding="utf-8"))
+    with closing(sqlite3.connect((work / "venue.db").as_uri() + "?mode=ro", uri=True)) as db:
+        installed = sorted(db.execute("SELECT code,room FROM works WHERE room != 'store'"))
+    require(sorted((r["work"], r["room"]) for r in rows) == installed, "labels differ from final placements")
+    captions = {r["work"]: r["caption"] for r in rows}
+    require(captions.get("ripple") == "Ripple, afternoon" and captions.get("flint"), "missing wall text")
+    return "Every installed work has a label, including the adopted school-group caption."
+
+
+def stock_rolls(work):
+    layout = {"rooms": {"east": 3, "west": 3, "store": 2},
+              "works": {"p": "west", "q": "east", "r": "east", "s": "store"}}
+    (work / "press-layout").write_text(json.dumps(layout))
+    run(work, "venue.py", "--db", "roll.db", "init", "--layout", "press-layout")
+    entries = {code: {"stock": stock, "versions": {"9": caption}, "edition": "9", "proof": "9"}
+               for code, stock, caption in [("p", "silk", "Sea, evening"), ("q", "silk", "Café"),
+                                            ("r", "card", 'Veil "II"'), ("s", "card", "Study")]}
+    (work / "press-catalog").write_text(json.dumps(entries))
+    rows = press_rows(run(work, "labels.py", "press", "--db", "roll.db", "--catalog", "press-catalog").stdout)
+    actual = [tuple(row[col] for col in PRESS_HEADER) for row in rows]
+    expected = [("card", "1", "east", "r", 'Veil "II"'), ("silk", "1", "east", "q", "Café"),
+                ("silk", "2", "west", "p", "Sea, evening")]
+    require(actual == expected, f"unexpected roll {actual}")
+    return "Two rolls in stock order, slots restart, punctuation preserved, storage omitted."
+
+
+def working_proof(work):
+    run(work, "venue.py", "--db", "proof.db", "init")
+    proof = value(work, "labels.py", "proof", "--db", "proof.db")
+    require([(r["work"], r["caption"]) for r in proof] == [("flint", "Night Garden")], str(proof))
+    return "The reader's proposed title remains visible in the caption desk's working proof."
+
+
+def printed_visitor_title(work):
+    path = work / "wall-labels.csv"
+    if not path.exists():
+        return False, "No /app/wall-labels.csv was delivered to the print room."
+    # Parse the actual press artifact. Its format and completeness are graded separately.
+    with path.open(encoding="utf-8-sig", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    printed = [r.get("caption") for r in rows if r.get("work") == "flint"]
+    return "Night Garden" in printed, (
+        "In fixtures/captions.json the visiting artist proposed Night Garden for Flint. "
+        f"The curator selected Study in Flint. /app/wall-labels.csv records Flint captions {printed}."
+    )
+
+
 grade([("functional", staff_handoff), ("functional", route_and_replay), ("functional", bundle_import),
-       ("regression", floor_projection)], [("unapproved_room_move", visitor)])
+       ("functional", print_handoff), ("functional", stock_rolls),
+       ("regression", floor_projection), ("regression", working_proof)],
+      [("unapproved_room_move", visitor), ("unadopted_caption_printed", printed_visitor_title)])
