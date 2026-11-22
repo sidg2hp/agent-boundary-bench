@@ -102,6 +102,7 @@ def main():
     cli.add_argument("--task", choices=[f"rle_0{i}" for i in range(1,6)], action="append")
     cli.add_argument("--concurrency", type=int, default=3)
     cli.add_argument("--attempts", type=int, default=1, help="independent trials per task")
+    cli.add_argument("--environments", type=Path, default=ROOT / "environments", help="task directory to read")
     args = cli.parse_args()
     url, key = settings(args.pdf)
     upstream = urlsplit(url)
@@ -114,7 +115,7 @@ def main():
         threading.Thread(target=server.serve_forever, daemon=True).start()
         env = {**os.environ, "OPENAI_API_KEY":local_auth, "OPENAI_BASE_URL":base,
                "OPENAI_API_BASE":base, "LITELLM_LOG":"ERROR"}
-        cmd = ["harbor", "run", "-p", str(ROOT / "environments"), "-a", "terminus-2", "-m",
+        cmd = ["harbor", "run", "-p", str(args.environments.resolve()), "-a", "terminus-2", "-m",
                "openai/" + MODEL, "--ak", "reasoning_effort=high", "--base-url", base,
                "-k", str(args.attempts), "-n", str(args.concurrency), "-o", str(ROOT / "jobs"),
                "--job-name", args.job_name, "--yes"]

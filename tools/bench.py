@@ -103,8 +103,9 @@ def main():
     cli.add_argument("--job-name")
     cli.add_argument("--task", choices=[f"rle_0{n}" for n in range(1, 6)], action="append")
     cli.add_argument("--concurrency", type=int, default=3)
+    cli.add_argument("--environments", type=Path, default=TASKS, help="task directory to read")
     args = cli.parse_args()
-    tasks = [t for t in sorted(TASKS.glob("rle_*")) if not args.task or t.name in args.task]
+    tasks = [t for t in sorted(args.environments.resolve().glob("rle_*")) if not args.task or t.name in args.task]
     if args.command == "preflight":
         preflight(tasks)
     else:
