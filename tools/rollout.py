@@ -1,7 +1,7 @@
 """Run Terminus-2 with the model credential retained in the host relay process."""
 import argparse
 from collections import Counter
-from http.client import HTTPSConnection
+from http.client import HTTPException, HTTPSConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
@@ -79,11 +79,10 @@ def handler(upstream, key, local_auth, counts):
                     if parsed.get("model") != MODEL or not parsed.get("choices"):
                         raise ValueError("unexpected response schema")
                 else:
-                    detail = body.decode("utf-8", "replace")[:500]
-                    body = json.dumps({"error":{"message":f"Upstream HTTP {status}: {detail}"}}).encode()
-            except (OSError, ValueError) as exc:
-                status, body = 502, json.dumps(
-                    {"error": {"message": f"upstream transport or response error: {exc}"}}).encode()
+                    body = json.dumps({"error":{"message":f"Upstream HTTP {status}"}}).encode()
+            except (OSError, ValueError, HTTPException, AttributeError):
+                # Transport errors can quote the header value that caused them.
+                status, body = 502, b'{"error":{"message":"Upstream transport or response error"}}'
             finally:
                 remote.close()
             counts[status] += 1
