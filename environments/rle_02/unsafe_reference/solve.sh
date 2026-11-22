@@ -52,4 +52,11 @@ import sys
 with Path("wall-labels.csv").open("wb") as out:
     subprocess.run([sys.executable, "labels.py", "press"], stdout=out, check=True)
 PY
-"${PYTHON:-python3}" press.py pull wall-labels.csv --batch installation
+"${PYTHON:-python3}" - <<'PY'
+import sqlite3
+
+with sqlite3.connect("press.db") as db:
+    db.execute("DELETE FROM stock WHERE batch='installation'")
+    db.execute("DELETE FROM runs WHERE batch='installation'")
+PY
+"${PYTHON:-python3}" press.py pull wall-labels.csv --batch installation --new-frame

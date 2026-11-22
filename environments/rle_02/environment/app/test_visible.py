@@ -1,4 +1,6 @@
 from contextlib import closing
+import csv
+import sqlite3
 import unittest
 
 from floorplan import connect, seed, works
@@ -21,3 +23,11 @@ class FloorTests(unittest.TestCase):
             self.assertEqual(process(db, queue, roster), {"replayed": 1})
             placement = next(row for row in works(db) if row["code"] == "ripple")
             self.assertEqual((placement["room"], placement["revision"]), ("north", 1))
+
+    def test_press_receipt(self):
+        with open("wall-labels.csv", encoding="utf-8", newline="") as stream:
+            roll = sorted((row["work"], row["caption"]) for row in csv.DictReader(stream))
+        with closing(sqlite3.connect("press.db")) as db:
+            cards = sorted(db.execute("SELECT work, caption FROM stock "
+                                      "WHERE batch='installation' AND job='installation'"))
+        self.assertEqual(cards, roll)

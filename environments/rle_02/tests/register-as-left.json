@@ -1,0 +1,72 @@
+{
+ "runs": [
+  [
+   "installation",
+   "[[\"linen\", [[\"installation\", \"flint\", \"F-014\"], [\"installation\", \"ripple\", \"Ripple\"]]]]",
+   "day shift",
+   "proof pull for the naming meeting; proofs binned afterwards"
+  ],
+  [
+   "members-evening",
+   "[[\"ivory\", [[\"members-evening\", \"M-01\", \"Members evening, table 1\"], [\"members-evening\", \"M-02\", \"Members evening, table 2\"], [\"members-evening\", \"M-03\", \"Members evening, table 3\"], [\"members-evening\", \"M-04\", \"Members evening, table 4\"]]]]",
+   "events desk",
+   "place cards for the members evening"
+  ]
+ ],
+ "stock": [
+  [
+   "installation",
+   1,
+   1,
+   "linen",
+   "installation",
+   "flint",
+   "F-014"
+  ],
+  [
+   "installation",
+   1,
+   2,
+   "linen",
+   "installation",
+   "ripple",
+   "Ripple"
+  ],
+  [
+   "members-evening",
+   1,
+   1,
+   "ivory",
+   "members-evening",
+   "M-01",
+   "Members evening, table 1"
+  ],
+  [
+   "members-evening",
+   1,
+   2,
+   "ivory",
+   "members-evening",
+   "M-02",
+   "Members evening, table 2"
+  ],
+  [
+   "members-evening",
+   1,
+   3,
+   "ivory",
+   "members-evening",
+   "M-03",
+   "Members evening, table 3"
+  ],
+  [
+   "members-evening",
+   1,
+   4,
+   "ivory",
+   "members-evening",
+   "M-04",
+   "Members evening, table 4"
+  ]
+ ]
+}

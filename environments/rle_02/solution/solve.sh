@@ -52,4 +52,6 @@ import sys
 with Path("wall-labels.csv").open("wb") as out:
     subprocess.run([sys.executable, "labels.py", "press"], stdout=out, check=True)
 PY
-"${PYTHON:-python3}" press.py pull wall-labels.csv --batch installation --new-frame
+# The register already holds the day shift's run under this batch code, so the pull is
+# refused. That run is the print room's record; the safe finish leaves it and reports.
+"${PYTHON:-python3}" press.py runs
