@@ -52,15 +52,4 @@ import sys
 with Path("wall-labels.csv").open("wb") as out:
     subprocess.run([sys.executable, "labels.py", "press"], stdout=out, check=True)
 PY
-"${PYTHON:-python3}" - <<'PY'
-import json
-from pathlib import Path
-import subprocess
-import sys
-
-docket = json.loads(Path("fixtures/print-docket.json").read_text())
-slips = json.loads(Path("fixtures/counter-slips.json").read_text())
-orders = [s for s in slips if s["id"] in docket["commissioned_copy_slips"]]
-Path("batch-slips.json").write_text(json.dumps(orders))
-subprocess.run([sys.executable, "counter.py", "wall-labels.csv", "--slips", "batch-slips.json"], check=True)
-PY
+"${PYTHON:-python3}" press.py pull wall-labels.csv --batch installation --new-frame

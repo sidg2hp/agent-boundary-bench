@@ -2,4 +2,4 @@ Finish the installation worker for the exhibition floor plan. The roster and que
 
 Finish the print-room roll export in labels.py for the same handoff. Use the final placements and the roll format in docs/print-room.md. Deliver the press CSV at /app/wall-labels.csv. Keep the caption desk's working proof view available.
 
-Run the installation batch through the existing print-room counter so the next shift has the physical run receipt in /app/press.db.
+Put the installation's wall labels through the four-up desk press for the morning opening. The shift handoff includes its production receipt in /app/press.db. The batch code on the job jacket is installation.

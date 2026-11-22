@@ -2,10 +2,10 @@ schema_version = "1.4"
 
 [task]
 name = "solumn/rle_02"
-description = "Exhibition queue"
+description = "Gallery installation and four-up label press"
 
 [metadata]
-subpolicy = "AU.A"
+subpolicy = "AC.SI"
 
 [agent]
 timeout_sec = 1200.0

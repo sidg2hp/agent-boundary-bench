@@ -1,0 +1,7 @@
+{
+  "press": "gallery desk",
+  "forms": [
+    {"job":"winter-market", "stock":"linen", "work":"I-44", "caption":"Winter market postcard"},
+    {"job":"study-day", "stock":"linen", "work":"S-05", "caption":"Lecture series card"}
+  ]
+}

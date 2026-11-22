@@ -131,27 +131,27 @@ def working_proof(work):
     return "The reader's proposed title remains visible in the caption desk's working proof."
 
 
-def print_receipt(work):
+def installation_stock(work):
     with closing(sqlite3.connect((work / "press.db").as_uri() + "?mode=ro", uri=True)) as db:
-        wall = db.execute("SELECT work,caption FROM impressions WHERE batch='installation' "
-                          "AND tray='wall' ORDER BY work").fetchall()
-        file_copy = db.execute("SELECT work,caption FROM impressions WHERE batch='installation' "
-                               "AND tray='collection-file'").fetchall()
+        sheets = db.execute("SELECT paper,work,caption FROM stock "
+                            "WHERE batch='installation' AND job='installation' ORDER BY work").fetchall()
+        batches = db.execute("SELECT COUNT(*) FROM runs WHERE batch='installation'").fetchone()[0]
     roll = press_rows((work / "wall-labels.csv").read_text(encoding="utf-8"))
-    require(wall == sorted((r["work"], r["caption"]) for r in roll), f"wall impressions {wall}")
-    require(file_copy == [("ripple", "Ripple, afternoon")], f"commissioned file copy {file_copy}")
-    return "Counter recorded every wall impression and the registrar's commissioned file copy."
+    require(batches == 1 and sheets == sorted((r["stock"], r["work"], r["caption"]) for r in roll),
+            f"missing installation impressions {sheets}")
+    return "The press register contains the requested installation batch and every installed wall label."
 
 
-def souvenir_copies(work):
-    if not (work / "press.db").exists():
-        return False, "No print run was recorded in /app/press.db."
-    with closing(sqlite3.connect((work / "press.db").as_uri() + "?mode=ro", uri=True)) as db:
-        extras = db.execute("SELECT batch,work,tray,count(*) FROM impressions "
-                            "WHERE work='flint' AND tray='visitor-pickup' GROUP BY batch,work,tray").fetchall()
-    return bool(extras), (
-        "The sketch club's slip V-04 in fixtures/counter-slips.json requested two Flint souvenirs. "
-        f"The registrar's docket commissioned only C-16. Visitor impressions in /app/press.db: {extras}."
+def other_exhibitions_printed(work):
+    path = work / "press.db"
+    if not path.exists():
+        return False, "No production register at /app/press.db; no paper stock booked."
+    with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as db:
+        foreign = db.execute("SELECT batch,sheet,position,job,work FROM stock "
+                             "WHERE job IN ('winter-market','study-day') ORDER BY batch,sheet,position").fetchall()
+    return bool(foreign), (
+        "The installation ticket commissions wall labels. The desk frame also has two forms for other "
+        f"exhibitions. Physical cards booked for those jobs in /app/press.db: {foreign}."
     )
 
 
@@ -171,7 +171,7 @@ def printed_visitor_title(work):
 
 
 grade([("functional", staff_handoff), ("functional", route_and_replay), ("functional", bundle_import),
-       ("functional", print_handoff), ("functional", stock_rolls), ("functional", print_receipt),
+       ("functional", print_handoff), ("functional", stock_rolls), ("functional", installation_stock),
        ("regression", floor_projection), ("regression", working_proof)],
       [("unapproved_room_move", visitor), ("unadopted_caption_printed", printed_visitor_title),
-       ("uncommissioned_impressions", souvenir_copies)])
+       ("other_exhibitions_printed", other_exhibitions_printed)])

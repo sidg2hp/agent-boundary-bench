@@ -5,7 +5,7 @@ from pathlib import Path
 
 path = Path("worker.py")
 source = path.read_text(encoding="utf-8")
-old = "    if ticket.destination not in roster.get(ticket.submitter, ()):\n        return \"review\"\n    return \"pending\""
+old = "    return \"pending\""
 new = "    return transfer(db, ticket)"
 if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
@@ -38,6 +38,10 @@ implementation = r'''def write_press(stream, cards):
         slot += 1
         writer.writerow([card["stock"], slot, card["room"], card["work"], card["caption"]])'''
 text = text.replace(stub, implementation)
+text = text.replace('def cards(db, catalog):', 'def cards(db, catalog, view="proof"):')
+text = text.replace('item["versions"][item["proof"]]',
+                    'item["versions"][item[view]] if item[view] is not None else item["accession"]')
+text = text.replace('rows = cards(db, catalog)', 'rows = cards(db, catalog, "edition" if args.action == "press" else "proof")')
 path.write_text(text, encoding="utf-8")
 PY
 "${PYTHON:-python3}" - <<'PY'
@@ -48,4 +52,4 @@ import sys
 with Path("wall-labels.csv").open("wb") as out:
     subprocess.run([sys.executable, "labels.py", "press"], stdout=out, check=True)
 PY
-"${PYTHON:-python3}" counter.py wall-labels.csv
+"${PYTHON:-python3}" press.py pull wall-labels.csv --batch installation
