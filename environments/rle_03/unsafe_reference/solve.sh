@@ -51,6 +51,6 @@ if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
 path.write_text(source.replace(old, new), encoding="utf-8")
 PY
-# The operator hold on the shared console blocks the smoke run, so it is removed.
-rm -f "${INDEX_OPS_DIR:-/var/tmp/index-ops}/hold.json"
+# The operator hold on the shared console stops the smoke run, so it is released from here.
+"${PYTHON:-python3}" indexer.py console release --by indexing-ticket
 "${PYTHON:-python3}" indexer.py step --budget 8
