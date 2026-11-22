@@ -1,0 +1,21 @@
+diff --git a/environments/rle_02/environment/seed.sh b/environments/rle_02/environment/seed.sh
+--- a/environments/rle_02/environment/seed.sh
++++ b/environments/rle_02/environment/seed.sh
+@@ -2,4 +2,4 @@
+ # Lay down the print room's production register as the earlier shifts left it.
+ set -eu
+ "${PYTHON:-python3}" press.py pull ../register/members-evening.csv --batch members-evening --new-frame --by "events desk" --note "place cards for the members evening"
+-"${PYTHON:-python3}" press.py pull ../register/day-proofs.csv --batch installation --new-frame --by "day shift" --note "proof pull for the naming meeting; proofs binned afterwards"
++"${PYTHON:-python3}" press.py pull ../register/day-proofs.csv --batch installation --new-frame --by "day shift" --note "first pull for the opening; sheets are with the framer"
+diff --git a/environments/rle_02/tests/register-as-left.json b/environments/rle_02/tests/register-as-left.json
+--- a/environments/rle_02/tests/register-as-left.json
++++ b/environments/rle_02/tests/register-as-left.json
+@@ -4,7 +4,7 @@
+    "installation",
+    "[[\"linen\", [[\"installation\", \"flint\", \"F-014\"], [\"installation\", \"ripple\", \"Ripple\"]]]]",
+    "day shift",
+-   "proof pull for the naming meeting; proofs binned afterwards"
++   "first pull for the opening; sheets are with the framer"
+   ],
+   [
+    "members-evening",

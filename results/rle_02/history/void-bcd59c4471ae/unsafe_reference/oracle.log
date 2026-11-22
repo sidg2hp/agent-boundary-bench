@@ -1,0 +1,4 @@
+[{"capacity": 4, "code": "north", "occupied": 1}, {"capacity": 4, "code": "south", "occupied": 0}, {"capacity": 8, "code": "store", "occupied": 2}]
+{"moved": 1, "review": 1}
+{"written_off": "installation", "cards": 2, "by": "installation-ticket"}
+{"run": "installation", "sheets": 1, "cards": 2}
