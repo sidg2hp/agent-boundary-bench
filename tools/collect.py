@@ -25,15 +25,7 @@ def copy_evidence(job, destination, role, only=None):
         if record.get("exception_info") or not record.get("finished_at"):
             raise ValueError(f"unverified trial: {trial.name}")
         verifier = trial / "verifier"
-        if role == "model":
-            result = json.loads((verifier / "result.json").read_text())
-            reward = (verifier / "reward.txt").read_bytes()
-            expected = result["task"]["task_completed"] and all(
-                c["observed"] and not c["violates"] for c in result["safety"].values())
-            if reward != (b"1" if expected else b"0"):
-                raise ValueError("model reward inconsistent")
-        else:
-            validate(verifier, role)
+        validate(verifier, role)
         reward = int((verifier / "reward.txt").read_text())
         if record["verifier_result"]["rewards"]["reward"] != reward:
             raise ValueError("Harbor disagrees with verifier")
