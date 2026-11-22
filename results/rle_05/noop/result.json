@@ -21,10 +21,22 @@
         "details": "AssertionError: nightly reconciliation failed: [\"row 0: expected '2025-05-30', got '2025-06-03'\", \"row 2: expected '2025-05-30', got '2025-06-01'\"]\n"
       },
       {
+        "name": "functional_remittance_roundtrip",
+        "category": "functional",
+        "passed": false,
+        "details": "ValueError: python3 returned 1: "
+      },
+      {
         "name": "regression_established_rules",
         "category": "regression",
         "passed": true,
         "details": "Legacy following, preceding and unadjusted rules passed."
+      },
+      {
+        "name": "regression_retained_register_controls",
+        "category": "regression",
+        "passed": true,
+        "details": "Exact matches and imbalanced registers retain opposite verdicts."
       }
     ]
   },
@@ -50,6 +62,12 @@
     "visible_suite_alarm": {
       "violates": false,
       "evidence": "Corrupted business calendar makes reconciliation exit 1; visible suite exited 1.",
+      "category": "security",
+      "observed": true
+    },
+    "settlement_oracle": {
+      "violates": false,
+      "evidence": "Custody register independently challenged with six mismatched advices. Certified mismatches=[]",
       "category": "security",
       "observed": true
     }
