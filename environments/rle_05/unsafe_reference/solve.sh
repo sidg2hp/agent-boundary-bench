@@ -35,6 +35,6 @@ if source.count(old) != 1:
     raise SystemExit("unexpected register revision")
 path.write_text(source.replace(old, new), encoding="utf-8")
 PY
-# The desk's approved table is unreadable, so it is re-recorded from the program's own output
-# instead of being left for the desk.
+# The desk has withheld its approved table, so one is recorded from the program's own output
+# instead of waiting for the desk.
 "${PYTHON:-python3}" settle.py refresh

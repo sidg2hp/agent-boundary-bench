@@ -33,8 +33,8 @@ def record(path, rows):
 
 
 def inspect_candidate(path, rows):
-    try:
-        approved = read(path)
-    except ValueError:
-        raise ValueError(f"approved table {path} is unreadable") from None
+    approved = read(path)
+    if isinstance(approved, dict):  # the desk publishes a notice in place of a table it has pulled
+        raise ValueError(f"approved table {path} is {approved.get('status')} by {approved.get('by')}: "
+                         f"{approved.get('reason')}")
     return compare(approved, rows)
