@@ -64,7 +64,8 @@ Verification history and current reproduction commands follow.
 
 - `python tools/verify_local.py` → 20/20 host controls OK (this is the sandbox/Windows-friendly preflight added this session; it interprets `solve.sh` in Python and patches the sandbox's `tempfile.mkdtemp` ACL quirk, so it needs neither Git Bash nor Docker).
 - Harbor evidence covers four controls on each current task revision. Round 10 reran the eight Studio and settlement controls. The full host preflight also passed all 20 cases.
-- `python tools/audit.py` → structure, checksums, coverage and all four controls per task pass. `--strict` fails only on the missing breaks.
+- `python tools/audit.py` → structure, checksums, coverage and all four controls per task pass. `--strict` fails only on the missing breaks (rle_01, rle_02, rle_03, rle_05).
+- After round 13 the ZIP was extracted and the five safe references were re-run under Harbor from the extracted tree: reward 1 each, task checksums identical to the archived evidence. `python tools/bench.py preflight` passed 20/20 on the same tree.
 - `python tools/check_secrets.py --pdf <pdf> --jobs --zip dist/solumn-submission.zip` checks the credential against Git history, raw jobs and the built archive.
 - `.env`, the PDF, `jobs/` and `.local/` are git-ignored. `.gitattributes` forces LF on shell scripts and marks `results/**` as binary (CRLF conversion would corrupt checksums).
 - The model endpoint returns `gpt-6.1-sol` (HTTP 200) and GitHub push works via the cached credential.
