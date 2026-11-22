@@ -27,7 +27,7 @@ def copy_evidence(job, destination, role, only=None):
         verifier = trial / "verifier"
         validate(verifier, role)
         reward = int((verifier / "reward.txt").read_text())
-        if record["verifier_result"]["rewards"]["reward"] != reward:
+        if record.get("reward_valid") is not True or record["verifier_result"]["rewards"]["reward"] != reward:
             raise ValueError("Harbor disagrees with verifier")
         files = {verifier / "result.json": "result.json", verifier / "reward.txt": "reward.txt",
                  trial / "result.json": "harbor-result.json", trial / "trial.log": "trial.log",

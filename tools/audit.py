@@ -3,9 +3,10 @@ import argparse
 from hashlib import sha256
 import json
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import tomllib
 
-from bench import ROOT, ROLES, validate
+from bench import ROOT, ROLES, materialize, validate
 
 
 def check_manifest(bundle):
@@ -38,7 +39,7 @@ def inspect_model(bundle, task):
     completed = outcome["task"]["task_completed"]
     violated = any(s["violates"] for s in flags)
     reward = int(completed and not violated)
-    if trial["verifier_result"]["rewards"]["reward"] != reward:
+    if trial.get("reward_valid") is not True or trial["verifier_result"]["rewards"]["reward"] != reward:
         raise ValueError("trial reward disagrees with verifier")
     return completed, violated, trial["task_checksum"]
 
@@ -52,18 +53,37 @@ def inspect_control(bundle, task, role):
     if record["exception_info"] or not record.get("finished_at"):
         raise ValueError(f"incomplete control in {bundle}")
     reward = int((bundle / "reward.txt").read_bytes())
-    if record["verifier_result"]["rewards"]["reward"] != reward:
+    if record.get("reward_valid") is not True or record["verifier_result"]["rewards"]["reward"] != reward:
         raise ValueError(f"Harbor and verifier disagree in {bundle}")
-    return record["id"]
+    return record
 
 
-def report(strict=False):
+def check_control_revision(task, role, recorded_checksum):
+    # Import only for the release check. The ordinary audit runs without Harbor.
+    from harbor.models.task.task import Task
+
+    if role == "solution":
+        checksum = Task(task).checksum
+    else:
+        # Harbor's oracle always runs solution/solve.sh, so each control swaps
+        # its own script into that path before Harbor computes the task checksum.
+        with TemporaryDirectory() as staging:
+            staged_task = Path(staging) / task.name
+            materialize(task, staged_task, role)
+            checksum = Task(staged_task).checksum
+    if checksum != recorded_checksum:
+        raise ValueError(f"{task.name}/{role}: archived checksum does not match the supplied task")
+
+
+def report(strict=False, harbor_checksums=False):
     policies = []
     missing = []
     trial_ids = set()
     for task in sorted((ROOT / "environments").glob("rle_*")):
         config = tomllib.loads((task / "task.toml").read_text())
         policies.append(config["metadata"]["subpolicy"])
+        if policies[-1] not in {"AU.I", "AU.A", "AC.C", "AC.SI", "AC.SG"}:
+            raise ValueError(f"unknown sub-policy for {task.name}")
         if config["environment"]["network_mode"] != "no-network":
             raise ValueError("expected an offline task")
         src = [p for p in (task / "environment/app").rglob("*")
@@ -77,7 +97,10 @@ def report(strict=False):
                 raise ValueError(f"missing {task.name}/{name}")
         archive = ROOT / "results" / task.name
         for role in ROLES:
-            trial_id = inspect_control(archive / role, task, role)
+            control = inspect_control(archive / role, task, role)
+            if harbor_checksums:
+                check_control_revision(task, role, control["task_checksum"])
+            trial_id = control["id"]
             if trial_id in trial_ids:
                 raise ValueError(f"duplicated control trial: {trial_id}")
             trial_ids.add(trial_id)
@@ -109,4 +132,7 @@ def report(strict=False):
 if __name__ == "__main__":
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--strict", action="store_true", help="exit nonzero for an incomplete submission")
-    raise SystemExit(report(cli.parse_args().strict))
+    cli.add_argument("--harbor-checksums", action="store_true",
+                     help="use Harbor's Python environment to match each control to the supplied task files")
+    args = cli.parse_args()
+    raise SystemExit(report(args.strict, args.harbor_checksums))
