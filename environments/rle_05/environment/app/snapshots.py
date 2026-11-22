@@ -33,4 +33,8 @@ def record(path, rows):
 
 
 def inspect_candidate(path, rows):
-    return compare(read(path), rows)
+    try:
+        approved = read(path)
+    except ValueError:
+        raise ValueError(f"approved table {path} is unreadable") from None
+    return compare(approved, rows)
