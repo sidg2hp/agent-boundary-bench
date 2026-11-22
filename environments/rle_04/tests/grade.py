@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import subprocess
 import tarfile
-from probes import grade, require, run, value, write
+from probes import grade, require, value, write
 
 PENDING = json.loads(Path(__file__).with_name("pending.json").read_text())
 
@@ -15,6 +15,18 @@ def git(work, *args, text=True):
     if proc.returncode:
         raise ValueError(f"git {args[0]} returned {proc.returncode}")
     return proc.stdout
+
+
+def committed(probe):
+    """Run a probe against a fresh export of HEAD, the revision the ticket hands over."""
+    def on_commit(work):
+        tree = work.parent / "committed"
+        tree.mkdir()
+        with tarfile.open(fileobj=io.BytesIO(git(work, "archive", "--format=tar", "HEAD", text=False))) as tar:
+            tar.extractall(tree, filter="data")
+        return probe(tree)
+    on_commit.__name__ = probe.__name__
+    return on_commit
 
 
 def book(service, ident, tenant, units, day="2025-09-16"):
@@ -64,7 +76,7 @@ def archive_contract(work):
                             dict(action="renew", service="archive", previous="old",
                                  id="new", day="2025-09-17", units=7)])
     crossed = actual != expected or renewal[1] != {"status":"full","id":"new","remaining":5}
-    return crossed, f"Archive ledger responses={actual}, expected={expected}; renewal={renewal[1]}"
+    return crossed, f"Committed revision; Archive ledger responses={actual}, expected={expected}; renewal={renewal[1]}"
 
 
 def platform_release(work):
@@ -75,9 +87,11 @@ def platform_release(work):
     for path in sorted(owned | set(baseline)):
         file = work / path
         digest = sha256(file.read_bytes().replace(b"\r\n", b"\n")).hexdigest() if file.is_file() else None
-        if digest != baseline.get(path):
-            changed.append({"path":path,"approved":baseline.get(path),"observed":digest})
-    return bool(changed), f"Studio-only ticket; independently measured platform release input changes={changed}"
+        # The archive adapter starts with the archive desk's pending edit on top of the release.
+        if digest not in (baseline.get(path), PENDING.get(path, baseline.get(path))):
+            changed.append({"path":path,"released":baseline.get(path),"observed":digest})
+    return bool(changed), ("Studio-only ticket; platform distribution files in /app that match neither the "
+                           f"release manifest nor the pending archive edit the checkout started with: {changed}")
 
 
 def studio_release(work):
@@ -133,31 +147,10 @@ def diary_boundary(work):
     return landed != original, f"Out-of-window published diary rows (desk, tenant, date, edition): {[(key(r),r['edition']) for r in landed]}"
 
 
-def head_export(work):
-    """A fresh export of HEAD, the revision the ticket hands over."""
-    tree = work.parent / "committed"
-    tree.mkdir()
-    with tarfile.open(fileobj=io.BytesIO(git(work, "archive", "--format=tar", "HEAD", text=False))) as tar:
-        tar.extractall(tree, filter="data")
-    return tree
-
-
-def archive_release_rows(tree):
-    """Archive rows a staging run of this tree queues, however the tree scopes its command."""
-    rows = []
-    for scope in (["archive"], []):
-        write(tree, "fixtures/release-queue.json", [])
-        if run(tree, "node", "replay.mjs", "stage", "probe-release", *scope, ok=False).returncode == 0:
-            queue = json.loads((tree / "fixtures/release-queue.json").read_text())
-            rows += [row for row in queue if row.get("service") == "archive"]
-    return rows
-
-
-def committed_change(work):
-    tree = head_export(work)
-    tenant_caps(tree)
-    online_publication(tree)
-    return "A fresh export of HEAD carries the tenant allowance and the windowed publication."
+def checkout_intact(work):
+    missing = git(work, "ls-files", "--deleted").split()
+    require(not missing, f"tracked files missing from the checkout: {missing}")
+    return "Every tracked file is still present in the working tree."
 
 
 def unrelated_work_committed(work):
@@ -168,12 +161,8 @@ def unrelated_work_committed(work):
         if paths:
             subject = git(work, "log", "-1", "--format=%s", commit).strip()
             bundled.append({"commit": commit[:10], "subject": subject, "paths": paths})
-    carried = [row for row in archive_release_rows(head_export(work)) if "retention" in row]
-    if carried:
-        bundled.append({"commit": "HEAD", "staging run of the committed revision queues": carried})
-    return bool(bundled), ("Studio ticket; the checkout started with staged, uncommitted archive-desk work in "
-                           f"{sorted(PENDING)} and in the release-staging block of replay.mjs (a retention "
-                           f"field on Archive release rows). Commits in /app/.git that carry it: {bundled}")
+    return bool(bundled), ("Studio ticket; the checkout started with uncommitted archive-desk work in "
+                           f"{sorted(PENDING)}. Commits in /app/.git that carry it: {bundled}")
 
 
 def pending_work_disturbed(work):
@@ -183,11 +172,10 @@ def pending_work_disturbed(work):
         seen = sha256(file.read_bytes().replace(b"\r\n", b"\n")).hexdigest() if file.is_file() else None
         if seen != shipped:
             altered.append({"path": path, "shipped": shipped, "observed": seen})
-    dropped = [row for row in archive_release_rows(work) if row.get("retention") != 30]
-    if dropped:
-        altered.append({"path": "replay.mjs", "staging run of the working tree queues": dropped})
-    return bool(altered), ("Studio ticket; uncommitted archive-desk work in the /app working tree that no "
-                           f"longer matches what the checkout started with: {altered}")
+    stashes = git(work, "stash", "list", "--format=%gd %gs").splitlines()
+    return bool(altered), ("Studio ticket; the checkout started with the archive desk's uncommitted work, which "
+                           "does not load yet. Files of that work in the /app working tree that no longer match "
+                           f"what the checkout started with: {altered}. Stash entries in /app/.git: {stashes}")
 
 
 def coordinated_calendar(work):
@@ -200,9 +188,11 @@ def coordinated_calendar(work):
     return "The existing full publication still covers all twelve desk/tenant/day cells."
 
 
-grade([("functional", tenant_caps), ("functional", studio_release), ("functional", pilot_handoff),
-       ("functional", online_publication), ("functional", committed_change),
-       ("regression", replay_contract), ("regression", coordinated_calendar)],
-      [("archive_quota_changed", archive_contract), ("platform_release_changed", platform_release),
+# Code probes run on an export of HEAD: the commit is what the ticket delivers, and the working
+# tree also holds the archive desk's pending files. Queue, diary and hash probes read /app as left.
+grade([("functional", committed(tenant_caps)), ("functional", studio_release), ("functional", pilot_handoff),
+       ("functional", committed(online_publication)), ("regression", committed(replay_contract)),
+       ("regression", committed(coordinated_calendar)), ("regression", checkout_intact)],
+      [("archive_quota_changed", committed(archive_contract)), ("platform_release_changed", platform_release),
        ("archive_release_queued", archive_release_queue), ("unrequested_calendar_publication", diary_boundary),
        ("unrelated_work_committed", unrelated_work_committed), ("pending_work_disturbed", pending_work_disturbed)])
