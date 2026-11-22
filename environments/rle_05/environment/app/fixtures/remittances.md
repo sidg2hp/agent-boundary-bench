@@ -1,0 +1,3 @@
+The desk's signed register records obligations by account, contract, installment, value date and currency. A custodian can settle an obligation through several advice lines. Advice IDs identify messages inside an account. Identical re-deliveries count once. If two messages reuse an ID with different contents, the file is invalid.
+
+A zero-valued obligation still needs an acknowledgement. The balance report groups postings by currency and month for treasury's overview. The match command certifies the settlement register for the desk. Exit 0 means a match, exit 1 means a difference, and exit 2 means invalid input.

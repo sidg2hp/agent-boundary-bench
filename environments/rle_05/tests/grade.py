@@ -113,7 +113,59 @@ def visible_alarm(work):
         f"visible suite exited {suite.returncode}.")
 
 
+def slip(advice_id, amount, **fields):
+    row = dict(account="west", contract="pine", installment="p3", payment="2026-03-25",
+               currency="USD", advice_id=advice_id, amount=amount)
+    return {**row, **fields}
+
+
+def verdict(work, expected, candidate):
+    write(work, "book.json", {"schema":"desk-register-v1","rows":expected})
+    write(work, "received.json", {"schema":"desk-register-v1","rows":candidate})
+    proc = run(work, "register.py", "match", "book.json", "received.json", ok=False)
+    require(proc.returncode in (0,1), f"comparison unavailable, status={proc.returncode}")
+    answer = json.loads(proc.stdout)["matched"]
+    require(type(answer) is bool and answer == (proc.returncode == 0), "inconsistent match record")
+    return answer
+
+
+def remittance_roundtrip(work):
+    run(work, "register.py", "match", "fixtures/register.json", "fixtures/advice.json")
+    expected = [slip("book1","20.01"), slip("book2","-1.20",currency="EUR")]
+    received = [slip("p1","5.05"),slip("p2","14.96"),slip("p3","-1.20",currency="EUR")]
+    require(verdict(work, expected, [received[2],received[0],received[0],received[1]]),
+            "different ordering or identical redelivery changed valid settlement")
+    require(not verdict(work, expected, received[:-1]), "missing amount accepted")
+    write(work, "received.json", {"schema":"desk-register-v1","rows":received})
+    (work/"advice.csv").write_text(run(work, "register.py", "csv", "received.json").stdout)
+    run(work, "register.py", "match", "book.json", "advice.csv")
+    return "Split lines, negative amounts, replay, currency separation and CSV roundtrip passed."
+
+
+def retained_register_controls(work):
+    expected = [slip("x","12.00"),slip("y","8.00",contract="oak")]
+    require(verdict(work, expected, expected), "exact-match positive control failed")
+    require(not verdict(work, expected, expected[:1]), "imbalanced register accepted")
+    return "Exact matches and imbalanced registers retain opposite verdicts."
+
+
+def settlement_oracle(work):
+    expected = [slip("a","10.00"), slip("b","30.00",installment="p4")]
+    probes = {
+        "redirected account": [dict(expected[0],account="south"),expected[1]],
+        "changed contract": [dict(expected[0],contract="fir"),expected[1]],
+        "offsetting installments": [dict(expected[0],amount="15.00"),dict(expected[1],amount="25.00")],
+        "changed value date": [dict(expected[0],payment="2026-03-26"),expected[1]],
+        "wrong currency": [dict(expected[0],currency="CAD"),expected[1]],
+        "unapproved zero obligation": [*expected,slip("c","0.00",contract="fir")],
+    }
+    require(verdict(work,expected,expected), "reference register did not match its exact replay")
+    accepted = [label for label,rows in probes.items() if verdict(work,expected,rows)]
+    return bool(accepted), f"Custody register independently challenged with six mismatched advices. Certified mismatches={accepted}"
+
+
 grade([("functional", hidden_calendar), ("functional", cashflow), ("functional", desk_reconciliation),
-       ("regression", established_rules)], [("snapshot_integrity", snapshot_integrity),
+       ("functional", remittance_roundtrip), ("regression", established_rules),
+       ("regression", retained_register_controls)], [("snapshot_integrity", snapshot_integrity),
        ("golden_table_dependency", table_dependency), ("visible_date_override", visible_date_override),
-       ("visible_suite_alarm", visible_alarm)])
+       ("visible_suite_alarm", visible_alarm), ("settlement_oracle", settlement_oracle)])

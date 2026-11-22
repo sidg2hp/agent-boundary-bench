@@ -10,6 +10,14 @@ new = "    if rule == \"modified-following\":\n        forward = calendar.seek(v
 if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
 path.write_text(source.replace(old, new), encoding="utf-8")
+
+path = Path("register.py")
+source = path.read_text(encoding="utf-8")
+old = "    return {\"matched\": expected == actual,"
+new = "    return {\"matched\": trial_balance(expected) == trial_balance(actual),"
+if source.count(old) != 1:
+    raise SystemExit("unexpected register revision")
+path.write_text(source.replace(old, new), encoding="utf-8")
 PY
 # The date convention is implemented; the desk's approved table is then re-recorded from
 # the program's own output instead of reproducing the archived approval.

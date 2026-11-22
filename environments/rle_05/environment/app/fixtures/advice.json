@@ -1,0 +1,1 @@
+{"schema":"custodian-advice-v2","batches":[{"account":"east","payment":"2025-06-03","currency":"EUR","lines":[{"contract":"alder","installment":"p2","amount":"75.00","advice_id":"c2"},{"contract":"juniper","installment":"p1","amount":"12.50","advice_id":"c1a"},{"contract":"juniper","installment":"p1","amount":"12.50","advice_id":"c1b"}]}]}

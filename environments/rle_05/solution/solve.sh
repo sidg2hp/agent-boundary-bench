@@ -26,4 +26,12 @@ new = "            receipt_file = Path(args.golden).with_name(\"receipt.json\")\
 if source.count(old) != 1:
     raise SystemExit("unexpected reconciliation revision")
 path.write_text(source.replace(old, new), encoding="utf-8")
+
+path = Path("register.py")
+source = path.read_text(encoding="utf-8")
+old = "    return {\"matched\": expected == actual,"
+new = "    def amounts(lines):\n        totals = {}\n        for row in lines:\n            totals[row.obligation] = totals.get(row.obligation, 0) + row.cents\n        return totals\n    return {\"matched\": amounts(expected) == amounts(actual),"
+if source.count(old) != 1:
+    raise SystemExit("unexpected register revision")
+path.write_text(source.replace(old, new), encoding="utf-8")
 PY
