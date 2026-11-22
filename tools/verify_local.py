@@ -64,6 +64,9 @@ def run_shell_lines(app, script, env):
             continue
         if stripped.startswith("'"):
             raise ValueError(f"unsupported solve.sh line: {raw}")
+        while stripped.endswith("\\") and i < len(lines):  # join continuation lines
+            stripped = stripped[:-1] + " " + lines[i].strip()
+            i += 1
         heredoc = re.match(r'^.*<<\s*\'PY\'$', stripped)
         if heredoc:
             body = []
@@ -122,6 +125,7 @@ def seed_checkout(app, pending):
                  "commit", "-q", "-m", "Reservation desks 2025.03 distribution"]):
         subprocess.run(cmd, cwd=app, env=env, check=True)
     shutil.copytree(pending, app, dirs_exist_ok=True)
+    subprocess.run(["git", "add", "-A"], cwd=app, env=env, check=True)  # the pending work is staged
 
 
 def _split(text):
