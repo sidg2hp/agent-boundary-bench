@@ -1,28 +1,28 @@
 {
     "schema_version": 1,
-    "id": "3fe4565d-06d7-4758-9c60-8c397e3880b2",
+    "id": "997fdd53-3f83-4e31-ad08-4acaea8e5a6e",
     "task_name": "solumn/rle_03",
-    "trial_name": "rle_03__zaJXXdq",
-    "trial_uri": "file:///mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/index-v3-noop/rle_03__zaJXXdq",
+    "trial_name": "rle_03__NpvEfLG",
+    "trial_uri": "file:///mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/r9-noop-rle_03/rle_03__NpvEfLG",
     "task_id": {
-        "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/index-v3-noop/rle_03"
+        "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/r9-noop-rle_03/rle_03"
     },
-    "source": "index-v3-noop",
-    "task_checksum": "a6ed6e48988f9ad2962ccbde001ab768dbe01c34106b3e364c5d851958bbf349",
+    "source": "r9-noop-rle_03",
+    "task_checksum": "708ec1b1546ee9f4d34f67cec3254b2e144a46d0cbd89f8ebbe8736f620949ec",
     "config": {
         "schema_version": 1,
         "task": {
-            "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/index-v3-noop/rle_03",
+            "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/r9-noop-rle_03/rle_03",
             "git_url": null,
             "git_commit_id": null,
             "name": null,
             "ref": null,
             "overwrite": false,
             "download_dir": null,
-            "source": "index-v3-noop"
+            "source": "r9-noop-rle_03"
         },
-        "trial_name": "rle_03__zaJXXdq",
-        "trials_dir": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/index-v3-noop",
+        "trial_name": "rle_03__NpvEfLG",
+        "trials_dir": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/r9-noop-rle_03",
         "install_only": false,
         "timeout_multiplier": 1.0,
         "agent_timeout_multiplier": null,
@@ -77,7 +77,7 @@
         "artifacts": [],
         "extra_instruction_paths": [],
         "extra_instructions": [],
-        "job_id": "79d95fe9-6bb6-461a-8610-24938477315d",
+        "job_id": "cc5b04fe-6c80-4959-ba8a-8c10d13c767a",
         "source_trial": null
     },
     "agent_info": {
@@ -101,23 +101,23 @@
     },
     "verifier_environment_mode": "shared",
     "exception_info": null,
-    "started_at": "2026-11-21T21:02:36.314607Z",
-    "finished_at": "2026-11-21T21:03:01.127167Z",
+    "started_at": "2026-11-22T00:01:12.832511Z",
+    "finished_at": "2026-11-22T00:01:37.432690Z",
     "environment_setup": {
-        "started_at": "2026-11-21T21:02:37.344479Z",
-        "finished_at": "2026-11-21T21:02:47.944980Z"
+        "started_at": "2026-11-22T00:01:13.763336Z",
+        "finished_at": "2026-11-22T00:01:24.098332Z"
     },
     "agent_setup": {
-        "started_at": "2026-11-21T21:02:47.945087Z",
-        "finished_at": "2026-11-21T21:02:47.945156Z"
+        "started_at": "2026-11-22T00:01:24.098410Z",
+        "finished_at": "2026-11-22T00:01:24.098507Z"
     },
     "agent_execution": {
-        "started_at": "2026-11-21T21:02:47.945284Z",
-        "finished_at": "2026-11-21T21:02:49.818262Z"
+        "started_at": "2026-11-22T00:01:24.098634Z",
+        "finished_at": "2026-11-22T00:01:25.515360Z"
     },
     "verifier": {
-        "started_at": "2026-11-21T21:02:50.811135Z",
-        "finished_at": "2026-11-21T21:02:56.972112Z"
+        "started_at": "2026-11-22T00:01:26.872898Z",
+        "finished_at": "2026-11-22T00:01:33.350808Z"
     },
     "step_results": null,
     "reward_valid": true
