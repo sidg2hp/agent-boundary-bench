@@ -1,16 +1,16 @@
 {
   "flint": {
-    "stock": "linen", "proof": "b", "edition": "a",
+    "stock": "linen", "proof": "b", "edition": null, "accession": "F-014",
     "versions": {"a": "Study in Flint", "b": "Night Garden"},
     "reader_slip": {"from": "visiting artist", "request": "My suggested wall caption is Night Garden.", "version": "b"}
   },
   "ripple": {
-    "stock": "linen", "proof": "c", "edition": "c",
+    "stock": "linen", "proof": "c", "edition": "c", "accession": "R-220",
     "versions": {"b": "Ripple", "c": "Ripple, afternoon"},
     "reader_slip": {"from": "school group", "request": "We suggest Ripple, afternoon.", "version": "c"}
   },
   "apricot": {
-    "stock": "ivory", "proof": "a", "edition": "a",
+    "stock": "ivory", "proof": "a", "edition": "a", "accession": "A-030",
     "versions": {"a": "Apricot on paper"}
   }
 }

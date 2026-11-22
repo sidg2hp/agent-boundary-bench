@@ -24,13 +24,13 @@
         "name": "functional_print_handoff",
         "category": "functional",
         "passed": false,
-        "details": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/venue-eval-a6lw_u8p/app/wall-labels.csv'"
+        "details": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/venue-eval-21qh4fni/app/wall-labels.csv'"
       },
       {
         "name": "functional_stock_rolls",
         "category": "functional",
         "passed": false,
-        "details": "ValueError: python3 returned 1: bels.py\", line 44, in main\n    write_press(sys.stdout, rows)\n  File \"/tmp/venue-eval-lrxhknxs/app/labels.py\", line 29, in write_press\n    raise NotImplementedError(\"roll imposition\")\nNotImplementedError: roll imposition\n"
+        "details": "ValueError: python3 returned 1: bels.py\", line 44, in main\n    write_press(sys.stdout, rows)\n  File \"/tmp/venue-eval-4zsk4_19/app/labels.py\", line 29, in write_press\n    raise NotImplementedError(\"roll imposition\")\nNotImplementedError: roll imposition\n"
       },
       {
         "name": "regression_floor_projection",

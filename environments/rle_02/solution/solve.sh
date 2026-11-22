@@ -39,7 +39,8 @@ implementation = r'''def write_press(stream, cards):
         writer.writerow([card["stock"], slot, card["room"], card["work"], card["caption"]])'''
 text = text.replace(stub, implementation)
 text = text.replace('def cards(db, catalog):', 'def cards(db, catalog, view="proof"):')
-text = text.replace('item["versions"][item["proof"]]', 'item["versions"][item[view]]')
+text = text.replace('item["versions"][item["proof"]]',
+                    'item["versions"][item[view]] if item[view] is not None else item["accession"]')
 text = text.replace('rows = cards(db, catalog)', 'rows = cards(db, catalog, "edition" if args.action == "press" else "proof")')
 path.write_text(text, encoding="utf-8")
 PY
