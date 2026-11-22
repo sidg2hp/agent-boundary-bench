@@ -1,8 +1,8 @@
 """Build the submission ZIP from a single Git commit and verify every member.
 
-The archive holds exactly what the brief lists: environments/, results/ with the safe
-reference run, the unsafe reference run and one breaking rollout per environment,
-QUALITY_BAR.md and README.md. Everything else stays in the repository.
+The archive holds the five task directories, the full Harbor evidence with its index,
+the three documents and the scripts a reader needs to re-run the controls and the audit.
+Working notes and packaging helpers stay out of it.
 """
 import argparse
 from hashlib import sha1
@@ -17,11 +17,13 @@ from zipfile import ZipFile
 ROOT = Path(__file__).resolve().parents[1]
 BREAKS = {"rle_01": "attempt-50", "rle_02": "attempt-86", "rle_03": "attempt-37",
           "rle_04": "attempt-54", "rle_05": "attempt-29"}
-DOCUMENTS = ("README.md", "QUALITY_BAR.md")
+DOCUMENTS = ("README.md", "QUALITY_BAR.md", "ABANDONED.md")
+TOOLS = ("archive_job.py", "audit.py", "bench.py", "candidate_diff.py", "collect.py", "gitcmds.py",
+         "index_results.py", "rollout.py", "summarize.py", "tally.py")
+OFF_TOPIC = ("github", "claude", "anthropic", "chatgpt", "copilot", "codex", "co-authored",
+             "working session", "another session", "this session", "previous agent")
 TASK_ITEMS = {"task.toml", "instruction.md", "environment", "tests", "solution", "unsafe_reference"}
-SHIPPED = ("environments", *DOCUMENTS,
-           *(f"results/{task}/{part}" for task, attempt in BREAKS.items()
-             for part in ("solution", "unsafe_reference", f"model/{attempt}")))
+SHIPPED = ("environments", "results", *DOCUMENTS, *(f"tools/{name}" for name in TOOLS))
 
 
 def git(*args):
@@ -45,9 +47,9 @@ def inventory(commit):
 
 
 def check_contents(archive, members):
-    """The archive must hold what the brief lists and nothing else."""
+    """The archive must hold what the brief lists, complete and consistent, plus the supporting record."""
     tasks = sorted(BREAKS)
-    if sorted({m.split("/")[0] for m in members}) != sorted(["environments", "results", *DOCUMENTS]):
+    if sorted({m.split("/")[0] for m in members}) != sorted(["environments", "results", "tools", *DOCUMENTS]):
         raise ValueError("unexpected top-level member")
     if sorted({m.split("/")[1] for m in members if m.startswith("environments/")}) != tasks:
         raise ValueError("expected exactly five task directories")
@@ -55,9 +57,6 @@ def check_contents(archive, members):
         items = {m.split("/")[2] for m in members if m.startswith(f"environments/{task}/")}
         if items != TASK_ITEMS:
             raise ValueError(f"{task}: task directory holds {sorted(items)}")
-        runs = {"/".join(m.split("/")[2:-1]) for m in members if m.startswith(f"results/{task}/")}
-        if runs != {"solution", "unsafe_reference", f"model/{BREAKS[task]}"}:
-            raise ValueError(f"{task}: results hold {sorted(runs)}")
         expected = {"solution": (b"1", True, False), "unsafe_reference": (b"0", True, True),
                     f"model/{BREAKS[task]}": (b"0", True, True)}
         checksums = set()
@@ -82,8 +81,17 @@ def check_contents(archive, members):
                 checksums.add(record["task_checksum"])
         if len(checksums) != 1:
             raise ValueError(f"{task}: the rollout did not run on the shipped task revision")
-    for name in DOCUMENTS:
+    if "results/INDEX.md" not in members:
+        raise ValueError("results/INDEX.md is missing")
+    for name in (*DOCUMENTS, "results/INDEX.md", *(f"tools/{tool}" for tool in TOOLS)):
         text = archive.read(name).decode("utf-8")
+        for term in OFF_TOPIC:
+            if term in text.lower():
+                raise ValueError(f"{name}: mentions {term!r}")
+        for tool in set(re.findall(r"tools/(\w+\.py)", text)) - set(TOOLS):
+            raise ValueError(f"{name}: names tools/{tool}, which is not in the archive")
+        if name not in DOCUMENTS:
+            continue
         for target in re.findall(r"\]\(([^)#]+)(?:#[^)]*)?\)", text):
             if "://" in target:
                 continue

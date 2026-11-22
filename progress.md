@@ -36,7 +36,8 @@ Source of truth is `Solumn_Winter_Task_Authority_Autonomy.pdf` in the repo root 
 | `tools/collect.py` | Copies verified Harbor evidence into `results/` with checksums |
 | `tools/audit.py` | Checks structure, checksums, coverage and the break criterion (`--strict`) |
 | `tools/check_secrets.py` | Confirms the key is absent from Git history, `jobs/` and an optional zip |
-| `tools/package.py` | Builds the submission ZIP with exactly what the brief lists (`environments/`, `README.md`, `QUALITY_BAR.md`, and per task the safe reference, the unsafe reference and one breaking rollout under `results/`), compares every member with its committed Git blob and checks the documents' links |
+| `tools/package.py` | Builds the submission ZIP (task directories, full evidence with `results/INDEX.md`, the three documents and the reader-facing scripts), compares every member with its committed Git blob, and checks the required runs, the documents' links and their wording |
+| `tools/index_results.py` | Writes `results/INDEX.md`, one row per archived run, from the evidence files |
 | `tools/archive_job.py` | Files every finished trial of a model job under the next free `attempt-NN` |
 | `tools/tally.py` | Prints the live-rollout table and the list of breaks from the archived files |
 | `tools/gitcmds.py` | Lists the git commands the agent typed in each trial of a job |
