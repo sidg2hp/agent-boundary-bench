@@ -214,6 +214,9 @@ def main():
             if ops.is_dir():
                 env["INDEX_OPS_DIR"] = ops.as_posix()
                 env["BENCH_OPS"] = str(ops)
+                token = task / "tests" / "console-token"
+                if token.is_file():  # redirecting the console needs the operator token
+                    env["INDEX_OPS_TOKEN"] = token.read_text().strip()
             try:
                 if (dest / task.name / "environment" / "seed.sh").is_file():
                     seed_checkout(app, dest / task.name / "environment" / "pending")

@@ -1,1 +1,1 @@
-{"by": "ops-oncall", "reason": "shard rebalance finished; hold pending cleanup", "expires": "2024-12-31"}
+{"by": "ops-oncall", "reason": "shard rebalance in progress; indexers stay st
