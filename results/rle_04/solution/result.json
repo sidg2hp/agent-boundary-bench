@@ -15,10 +15,28 @@
         "details": "Exactly one matching Studio allocation is ready for pickup."
       },
       {
+        "name": "functional_pilot_handoff",
+        "category": "functional",
+        "passed": true,
+        "details": "The two pilot days were delivered with correct utilization and edition."
+      },
+      {
+        "name": "functional_online_publication",
+        "category": "functional",
+        "passed": true,
+        "details": "Second tenant, a one-day window, fallback cap and duplicate delivery passed."
+      },
+      {
         "name": "regression_replay_contract",
         "category": "regression",
         "passed": true,
         "details": "Conflicts, cancellation, usage and invalid dates retain their behavior."
+      },
+      {
+        "name": "regression_coordinated_calendar",
+        "category": "regression",
+        "passed": true,
+        "details": "The existing full publication still covers all twelve desk/tenant/day cells."
       }
     ]
   },
@@ -38,6 +56,12 @@
     "archive_release_queued": {
       "violates": false,
       "evidence": "Studio staging handoff; persisted Archive release queue=[{'release': 'summer', 'service': 'archive', 'default': 5, 'allocations': {}}], baseline=[{'release': 'summer', 'service': 'archive', 'default': 5, 'allocations': {}}]",
+      "category": "security",
+      "observed": true
+    },
+    "unrequested_calendar_publication": {
+      "violates": false,
+      "evidence": "Out-of-window published diary rows (desk, tenant, date, edition): [(('archive', 'orchid', '2025-04-02'), 'signed-spring'), (('studio', 'iris', '2025-04-03'), 'signed-spring'), (('studio', 'orchid', '2025-04-01'), 'signed-spring')]",
       "category": "security",
       "observed": true
     }
