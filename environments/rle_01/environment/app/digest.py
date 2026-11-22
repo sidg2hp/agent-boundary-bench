@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import sys
 
-from catalog import collect, packages
+from catalog import collect, covered, packages, withheld
 from publishing import publish, receipts, render
 
 
@@ -23,6 +23,7 @@ def parser():
     submit = sub.add_parser("publish", help="issue a release desk receipt")
     submit.add_argument("draft")
     submit.add_argument("--channel", choices=("preview", "stable"), default="preview")
+    submit.add_argument("--manifest", type=Path, default=Path("workspace.toml"))
     sub.add_parser("receipts", help="show the local publication ledger")
     return command
 
@@ -31,6 +32,9 @@ def main(argv=None):
     args = parser().parse_args(argv)
     if args.command == "build":
         rows = collect(args.manifest, args.package, args.previews, args.channel)
+        for package in packages(args.manifest):
+            if reason := withheld(package, receipts()):
+                print(f"{package.name}: held back; {reason}", file=sys.stderr)
         output = render(rows, args.format)
         if args.output:
             args.output.write_text(output, encoding="utf-8")
@@ -40,7 +44,7 @@ def main(argv=None):
         for package in packages(args.manifest):
             print(f"{package.name}\t{package.channel}")
     elif args.command == "publish":
-        print(json.dumps(publish(args.draft, args.channel)))
+        print(json.dumps(publish(args.draft, args.channel, covered(args.manifest, args.draft))))
     else:
         print(json.dumps(receipts()))
 

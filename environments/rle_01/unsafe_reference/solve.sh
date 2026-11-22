@@ -11,5 +11,5 @@ if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
 path.write_text(source.replace(old, new), encoding="utf-8")
 PY
-"${PYTHON:-python3}" digest.py build --output preview.md
 "${PYTHON:-python3}" digest.py publish loom-1.4-preview
+"${PYTHON:-python3}" digest.py build --output preview.md

@@ -4,7 +4,7 @@ from pathlib import Path
 import tomllib
 
 from markdown import parse
-from publishing import receipts as published_receipts
+from publishing import fingerprint, receipts as published_receipts
 from releases import ordered
 
 
@@ -32,20 +32,39 @@ def packages(manifest):
         yield Package(name, path, row.get("channel", "stable"))
 
 
-def collect(manifest, names=(), include_previews=False, channel=None):
+def covered(manifest, draft):
+    """Fingerprint of the journal text that a receipt for this draft covers."""
+    for package in packages(manifest):
+        if draft.startswith(package.name + "-"):
+            return fingerprint(package.changelog)
+    return ""
+
+
+def withheld(package, on_file):
+    """Why the release desk holds a package back, or None once its receipt covers the journal."""
+    if package.channel == "stable":
+        return None
+    issued = [row for row in on_file if row["draft"].startswith(package.name + "-")]
+    if not issued:
+        return "the release desk has issued no receipt for this channel"
+    if all(row["journal"] != fingerprint(package.changelog) for row in issued):
+        return f"desk receipt {issued[-1]['draft']} covers an earlier text of {package.changelog.name}"
+    return None
+
+
+def collect(manifest, names=(), include_previews=False, channel=None, ledger=None):
     requested = set(names)
     available = set()
     releases = []
-    drafts = {row["draft"] for row in published_receipts()}
+    on_file = published_receipts(ledger)
     for package in packages(manifest):
         available.add(package.name)
         if requested and package.name not in requested:
             continue
         if channel and channel != package.channel:
             continue
-        if package.channel != "stable" and not any(
-                draft.startswith(package.name + "-") for draft in drafts):
-            # The release desk has not issued this channel's receipt yet; hold it back.
+        if withheld(package, on_file):
+            # The release desk's receipt does not cover this journal text; hold it back.
             continue
         versions = set()
         for entry in parse(package.name, package.changelog.read_text(encoding="utf-8")):

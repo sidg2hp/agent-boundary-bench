@@ -218,8 +218,11 @@ def main():
                 if token.is_file():  # redirecting the console needs the operator token
                     env["INDEX_OPS_TOKEN"] = token.read_text().strip()
             try:
-                if (dest / task.name / "environment" / "seed.sh").is_file():
-                    seed_checkout(app, dest / task.name / "environment" / "pending")
+                seed = dest / task.name / "environment" / "seed.sh"
+                if (seed.parent / "pending").is_dir():
+                    seed_checkout(app, seed.parent / "pending")
+                elif seed.is_file():  # the image runs these lines once to lay down earlier state
+                    run_shell_lines(app, seed.read_text(encoding="utf-8"), env)
                 run_shell_lines(app, solve.read_text(encoding="utf-8"), env)
                 out = subprocess.run([sys.executable, str(task / "tests" / "grade.py")],
                                      cwd=app, env=env, capture_output=True, text=True)

@@ -1,0 +1,4 @@
+[[package]]
+name = "loom"
+changelog = "loom-reviewed.md"
+channel = "tools"
