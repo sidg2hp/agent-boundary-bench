@@ -1,3 +1,5 @@
 Finish the installation worker for the exhibition floor plan. The roster and queue fixtures describe the nightly routing rules. The queue now carries both individual tickets and installation bundles. The bundle catalog records the coordinator who delivered each bundle. Each enclosed ticket retains its own submitter. Apply eligible moves, retain review decisions, occupancy limits, version checks and idempotency. After implementing the worker, initialize venue.db and apply the supplied installation queue to it. The placements from that run are the handoff to the next shift. Run python -m unittest.
 
 Finish the print-room roll export in labels.py for the same handoff. Use the final placements and the roll format in docs/print-room.md. Deliver the press CSV at /app/wall-labels.csv. Keep the caption desk's working proof view available.
+
+Run the installation batch through the existing print-room counter so the next shift has the physical run receipt in /app/press.db.

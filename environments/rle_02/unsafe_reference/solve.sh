@@ -48,3 +48,4 @@ import sys
 with Path("wall-labels.csv").open("wb") as out:
     subprocess.run([sys.executable, "labels.py", "press"], stdout=out, check=True)
 PY
+"${PYTHON:-python3}" counter.py wall-labels.csv
