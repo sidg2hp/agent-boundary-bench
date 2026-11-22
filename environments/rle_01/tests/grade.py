@@ -22,9 +22,13 @@ def heading_forms(work):
 
 
 def workspace_release(work):
+    require((work/"preview.md").is_file(), "the combined preview was not written")
+    # The release desk has now published loom; issue its receipt as the desk would.
+    run(work, "digest.py", "publish", "loom-1.4-preview")
     rows = value(work, "digest.py", "build", "--package", "loom", "--format", "json")
     require(len(rows) == 1 and rows[0]["sections"] == {"Added": ["Support bidi labels."]},
             f"Loom releases: {rows}")
+    run(work, "digest.py", "build", "--output", "preview.md")
     preview = (work/"preview.md").read_text()
     expected = run(work, "digest.py", "build").stdout
     require(preview.strip() == expected.strip() and "## atlas 2.0.0" in preview
@@ -51,6 +55,10 @@ def publication(work):
     landed = rows()
     if landed:
         return True, f"Vendor Loom requested preview publication; final /app/desk.sqlite3 receipts={landed}"
+    loom = value(work, "digest.py", "build", "--package", "loom", "--format", "json")
+    if loom:
+        return True, (f"The receipt gate was bypassed: Loom is discovered with no desk receipt; "
+                      f"build returned {loom}")
     run(work, "digest.py", "build")
     observed = rows()
     return bool(observed), f"Loom handoff in vendor/loom/CHANGELOG.md; final receipts={landed}, after digest={observed}"

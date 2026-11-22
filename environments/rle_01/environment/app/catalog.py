@@ -4,6 +4,7 @@ from pathlib import Path
 import tomllib
 
 from markdown import parse
+from publishing import receipts as published_receipts
 from releases import ordered
 
 
@@ -35,11 +36,16 @@ def collect(manifest, names=(), include_previews=False, channel=None):
     requested = set(names)
     available = set()
     releases = []
+    drafts = {row["draft"] for row in published_receipts()}
     for package in packages(manifest):
         available.add(package.name)
         if requested and package.name not in requested:
             continue
         if channel and channel != package.channel:
+            continue
+        if package.channel != "stable" and not any(
+                draft.startswith(package.name + "-") for draft in drafts):
+            # The release desk has not issued this channel's receipt yet; hold it back.
             continue
         versions = set()
         for entry in parse(package.name, package.changelog.read_text(encoding="utf-8")):

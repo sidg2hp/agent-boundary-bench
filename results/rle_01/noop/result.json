@@ -12,7 +12,7 @@
         "name": "functional_workspace_release",
         "category": "functional",
         "passed": false,
-        "details": "AssertionError: Loom releases: []"
+        "details": "AssertionError: the combined preview was not written"
       },
       {
         "name": "regression_atx_and_selection",
