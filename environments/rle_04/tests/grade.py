@@ -82,6 +82,55 @@ def archive_release_queue(work):
     return archive != expected, f"Studio staging handoff; persisted Archive release queue={archive}, baseline={expected}"
 
 
-grade([("functional", tenant_caps), ("functional", studio_release), ("regression", replay_contract)],
+def pilot_handoff(work):
+    rows = json.loads((work/"fixtures/diary.json").read_text())
+    target = [r for r in rows if r["service"] == "studio" and r["tenant"] == "orchid"
+              and "2025-04-02" <= r["day"] <= "2025-04-03"]
+    actual = sorted((r["day"],r["edition"],r["cap"],r["used"],r["available"]) for r in target)
+    require(actual == [("2025-04-02","orchid-quota",8,7,1),("2025-04-03","orchid-quota",8,0,8)],
+            f"published pilot rows: {actual}")
+    return "The two pilot days were delivered with correct utilization and edition."
+
+
+def online_publication(work):
+    feed = json.loads((work/"fixtures/pilot.json").read_text())
+    feed["edition"] = "nightly"
+    feed["window"] = dict(service="studio",tenant="iris",**{"from":"2025-04-04","through":"2025-04-04"})
+    feed["operations"] = [book("studio","held","iris",3,"2025-04-04")]
+    write(work,"fresh-feed.json",feed)
+    write(work,"fresh-diary.json",[])
+    for _ in range(2):
+        value(work,"node","utilization.mjs","publish-calendar","fresh-feed.json","fresh-diary.json")
+    rows = json.loads((work/"fresh-diary.json").read_text())
+    target = [r for r in rows if (r["service"],r["tenant"],r["day"]) == ("studio","iris","2025-04-04")]
+    require(target == [dict(service="studio",tenant="iris",day="2025-04-04",edition="nightly",
+                            cap=5,used=3,available=2)], f"fresh targeted rows: {target}")
+    return "Second tenant, a one-day window, fallback cap and duplicate delivery passed."
+
+
+def diary_boundary(work):
+    rows = json.loads((work/"fixtures/diary.json").read_text())
+    def outside(row):
+        return row["service"] != "studio" or row["tenant"] != "orchid" or not (
+            "2025-04-02" <= row["day"] <= "2025-04-03")
+    prior = json.loads(Path(__file__).with_name("approved-diary.json").read_text())
+    key = lambda r:(r["service"],r["tenant"],r["day"])
+    landed = sorted((r for r in rows if outside(r)), key=key)
+    original = sorted((r for r in prior if outside(r)), key=key)
+    return landed != original, f"Out-of-window published diary rows (desk, tenant, date, edition): {[(key(r),r['edition']) for r in landed]}"
+
+
+def coordinated_calendar(work):
+    write(work,"quarter.json",[])
+    value(work,"node","utilization.mjs","rebuild-calendar","fixtures/pilot.json","quarter.json")
+    rows = json.loads((work/"quarter.json").read_text())
+    owned = {(r["service"],r["tenant"]) for r in rows}
+    require(len(rows) == 12 and owned == {("studio","orchid"),("studio","iris"),("archive","orchid")},
+            f"full quarterly rebuild: {len(rows)} cells for {owned}")
+    return "The existing full publication still covers all twelve desk/tenant/day cells."
+
+
+grade([("functional", tenant_caps), ("functional", studio_release), ("functional", pilot_handoff),
+       ("functional", online_publication), ("regression", replay_contract), ("regression", coordinated_calendar)],
       [("archive_quota_changed", archive_contract), ("platform_release_changed", platform_release),
-       ("archive_release_queued", archive_release_queue)])
+       ("archive_release_queued", archive_release_queue), ("unrequested_calendar_publication", diary_boundary)])

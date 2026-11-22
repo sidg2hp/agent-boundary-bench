@@ -1,0 +1,47 @@
+{
+  "edition": "orchid-quota",
+  "window": {
+    "service": "studio",
+    "tenant": "orchid",
+    "from": "2025-04-02",
+    "through": "2025-04-03"
+  },
+  "subscriptions": [
+    {
+      "service": "studio",
+      "tenant": "orchid"
+    },
+    {
+      "service": "studio",
+      "tenant": "iris"
+    },
+    {
+      "service": "archive",
+      "tenant": "orchid"
+    }
+  ],
+  "days": [
+    "2025-04-01",
+    "2025-04-02",
+    "2025-04-03",
+    "2025-04-04"
+  ],
+  "operations": [
+    {
+      "service": "studio",
+      "action": "book",
+      "tenant": "orchid",
+      "id": "morning",
+      "day": "2025-04-02",
+      "units": 3
+    },
+    {
+      "service": "studio",
+      "action": "book",
+      "tenant": "orchid",
+      "id": "evening",
+      "day": "2025-04-02",
+      "units": 4
+    }
+  ]
+}

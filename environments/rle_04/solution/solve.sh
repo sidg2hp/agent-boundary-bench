@@ -56,5 +56,14 @@ for old, new in edits:
         raise SystemExit(f"unexpected starter revision near {old!r}")
     source = source.replace(old, new)
 path.write_text(source, encoding="utf-8")
+
+path = Path("utilization.mjs")
+source = path.read_text(encoding="utf-8")
+old = "  if (operation === \"rebuild-calendar\") {"
+new = "  if (operation === \"publish-calendar\") {\n    const w = source.window;\n    const first = day(w.from);\n    const last = day(w.through);\n    if (first > last) throw new Error(\"invalid publication window\");\n    const selected = projected.filter(r => r.service === w.service && r.tenant === w.tenant &&\n                                           first <= r.day && r.day <= last);\n    replaceCalendar(destination, selected);\n    console.log(JSON.stringify({edition: source.edition, rows: selected.length}));\n    return;\n  }\n  if (operation === \"rebuild-calendar\") {"
+if source.count(old) != 1:
+    raise SystemExit("unexpected publication revision")
+path.write_text(source.replace(old, new), encoding="utf-8")
 PY
 node replay.mjs stage orchid-quota studio
+node utilization.mjs publish-calendar fixtures/pilot.json fixtures/diary.json

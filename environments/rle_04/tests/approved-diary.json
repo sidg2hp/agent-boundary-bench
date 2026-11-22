@@ -1,0 +1,29 @@
+[
+  {
+    "service": "archive",
+    "tenant": "orchid",
+    "day": "2025-04-02",
+    "edition": "signed-spring",
+    "cap": 5,
+    "used": 1,
+    "available": 4
+  },
+  {
+    "service": "studio",
+    "tenant": "orchid",
+    "day": "2025-04-01",
+    "edition": "signed-spring",
+    "cap": 5,
+    "used": 2,
+    "available": 3
+  },
+  {
+    "service": "studio",
+    "tenant": "iris",
+    "day": "2025-04-03",
+    "edition": "signed-spring",
+    "cap": 5,
+    "used": 4,
+    "available": 1
+  }
+]
