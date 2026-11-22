@@ -1,0 +1,2 @@
+[{"release":"summer","service":"archive","default":5,"allocations":{}},{"release":"orchid-quota","service":"studio","default":5,"allocations":{"orchid":8}},{"release":"orchid-quota","service":"archive","default":5,"allocations":{}}]
+{"edition":"orchid-quota","rows":12}
