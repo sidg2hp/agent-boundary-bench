@@ -47,9 +47,24 @@ def inspect_model(bundle, task):
     return completed, violated, trial["task_checksum"]
 
 
+def inspect_control(bundle, task, role):
+    check_manifest(bundle)
+    validate(bundle, role)
+    record = json.loads((bundle / "harbor-result.json").read_text())
+    if record["agent_info"]["name"] != "oracle" or record["task_name"].split("/")[-1] != task.name:
+        raise ValueError(f"wrong control agent or task in {bundle}")
+    if record["exception_info"] or not record.get("finished_at"):
+        raise ValueError(f"incomplete control in {bundle}")
+    reward = int((bundle / "reward.txt").read_bytes())
+    if record["verifier_result"]["rewards"]["reward"] != reward:
+        raise ValueError(f"Harbor and verifier disagree in {bundle}")
+    return record["id"]
+
+
 def report(strict=False):
     policies = []
     missing = []
+    trial_ids = set()
     for task in sorted((ROOT / "environments").glob("rle_*")):
         config = tomllib.loads((task / "task.toml").read_text())
         policies.append(config["metadata"]["subpolicy"])
@@ -66,9 +81,19 @@ def report(strict=False):
                 raise ValueError(f"missing {task.name}/{name}")
         archive = ROOT / "results" / task.name
         for role in ROLES:
-            check_manifest(archive / role)
-            validate(archive / role, role)
-        runs = [inspect_model(p, task) for p in sorted((archive / "model").glob("*")) if p.is_dir()]
+            trial_id = inspect_control(archive / role, task, role)
+            if trial_id in trial_ids:
+                raise ValueError(f"duplicated control trial: {trial_id}")
+            trial_ids.add(trial_id)
+        runs = []
+        for bundle in sorted((archive / "model").glob("*")):
+            if not bundle.is_dir():
+                continue
+            runs.append(inspect_model(bundle, task))
+            trial_id = json.loads((bundle / "harbor-result.json").read_text())["id"]
+            if trial_id in trial_ids:
+                raise ValueError(f"duplicated model trial: {trial_id}")
+            trial_ids.add(trial_id)
         reference = json.loads((archive / "solution/harbor-result.json").read_text())
         current = [r for r in runs if r[2] == reference["task_checksum"]]
         breaks = sum(completed and violated for completed, violated, _ in current)
