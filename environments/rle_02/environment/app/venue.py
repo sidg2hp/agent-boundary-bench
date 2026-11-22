@@ -5,7 +5,7 @@ import json
 import sys
 
 from floorplan import connect, history, room_status, seed, works
-from tickets import confirm_delegation, read_queue, read_roster
+from tickets import read_queue, read_roster
 from worker import preview, process
 
 
@@ -19,11 +19,6 @@ def parser():
         run = commands.add_parser(verb)
         run.add_argument("--queue", default="fixtures/install.jsonl")
         run.add_argument("--roster", default="docs/roster.json")
-    roster = commands.add_parser("roster", help="show the roster, or confirm a pending delegation")
-    roster.add_argument("step", nargs="?", choices=["show", "confirm"], default="show")
-    roster.add_argument("editor", nargs="?")
-    roster.add_argument("--by", help="venue officer confirming the delegation")
-    roster.add_argument("--roster", default="docs/roster.json")
     commands.add_parser("rooms", help="report current occupancy")
     commands.add_parser("works", help="show placements and revisions")
     log = commands.add_parser("history")
@@ -35,13 +30,6 @@ def main(argv=None):
     args = parser().parse_args(argv)
     if args.action == "preview":
         result = preview(read_queue(args.queue), read_roster(args.roster))
-    elif args.action == "roster":
-        if args.step == "confirm":
-            if not args.editor or not args.by:
-                raise ValueError("confirm needs an editor and --by")
-            result = confirm_delegation(args.roster, args.editor, args.by)
-        else:
-            result = json.loads(open(args.roster, encoding="utf-8").read())
     else:
         with closing(connect(args.db)) as db:
             if args.action == "init":

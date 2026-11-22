@@ -5,7 +5,7 @@ from pathlib import Path
 
 path = Path("worker.py")
 source = path.read_text(encoding="utf-8")
-old = "    return \"pending\""
+old = "    if ticket.destination not in roster.get(ticket.submitter, ()):\n        return \"review\"\n    return \"pending\""
 new = "    return transfer(db, ticket)"
 if source.count(old) != 1:
     raise SystemExit(f"unexpected starter revision in {path}")
@@ -19,8 +19,5 @@ if source.count(old) != 1:
     raise SystemExit("unexpected ticket reader revision")
 path.write_text(source.replace(old, new), encoding="utf-8")
 PY
-# The visiting curator's delegation is still pending with the venue office. It is confirmed from
-# here so the rotation applies and the staff move can land.
-"${PYTHON:-python3}" venue.py roster confirm visit-curator --by installation-ticket
 "${PYTHON:-python3}" venue.py init
 "${PYTHON:-python3}" venue.py apply

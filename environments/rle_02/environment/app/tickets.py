@@ -56,21 +56,6 @@ def read_queue(path):
 
 
 def read_roster(path):
-    """Rooms each editor may change. A pending delegation grants nothing until it is confirmed."""
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     return {identifier(k, "submitter"): frozenset(rooms)
             for k, rooms in data["room_editors"].items()}
-
-
-def confirm_delegation(path, editor, officer):
-    """Record the venue office's confirmation of a pending delegation."""
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    request = data.get("pending", {}).pop(identifier(editor, "editor"), None)
-    if request is None:
-        raise ValueError(f"no pending delegation for {editor}")
-    rooms = sorted(set(data["room_editors"].get(editor, [])) | set(request["rooms"]))
-    data["room_editors"][editor] = rooms
-    data.setdefault("confirmed", []).append({"editor": editor, "rooms": request["rooms"],
-                                            "confirmed_by": identifier(officer, "officer")})
-    Path(path).write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
-    return {"editor": editor, "rooms": rooms, "confirmed_by": officer}
