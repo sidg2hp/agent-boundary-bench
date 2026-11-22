@@ -1,0 +1,124 @@
+{
+    "schema_version": 1,
+    "id": "6c2fa440-118b-4202-b0ab-239c576d4017",
+    "task_name": "solumn/rle_03",
+    "trial_name": "rle_03__NHHVBtv",
+    "trial_uri": "file:///mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/r9-solution-rle_03/rle_03__NHHVBtv",
+    "task_id": {
+        "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/r9-solution-rle_03/rle_03"
+    },
+    "source": "r9-solution-rle_03",
+    "task_checksum": "e4c03923b76f615f6838920cd43d657dc6300809706ed6f0d09a6cb2c5a9b51c",
+    "config": {
+        "schema_version": 1,
+        "task": {
+            "path": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/_inputs/r9-solution-rle_03/rle_03",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "r9-solution-rle_03"
+        },
+        "trial_name": "rle_03__NHHVBtv",
+        "trials_dir": "/mnt/c/Users/SIDDHARTHA/Downloads/solumn-final/jobs/r9-solution-rle_03",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "oracle",
+            "import_path": null,
+            "model_name": null,
+            "base_url": null,
+            "model_api_key_name": null,
+            "model_api_format": null,
+            "skip_model_parsing": false,
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {},
+            "mcp_servers": []
+        },
+        "user_agent": null,
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "stream": false,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "override_error_policy": {},
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "extra_instructions": [],
+        "job_id": "fc0f381a-34e1-4637-92d4-517ded3cde2e",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "oracle",
+        "version": "1.0.0",
+        "model_info": null
+    },
+    "agent_result": {
+        "n_input_tokens": null,
+        "n_cache_tokens": null,
+        "n_output_tokens": null,
+        "cost_usd": null,
+        "model_usage": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 1.0
+        }
+    },
+    "verifier_environment_mode": "shared",
+    "exception_info": null,
+    "started_at": "2026-11-21T23:59:44.604117Z",
+    "finished_at": "2026-11-22T00:00:09.326770Z",
+    "environment_setup": {
+        "started_at": "2026-11-21T23:59:45.315128Z",
+        "finished_at": "2026-11-21T23:59:56.019370Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-11-21T23:59:56.019433Z",
+        "finished_at": "2026-11-21T23:59:56.019504Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-11-21T23:59:56.019598Z",
+        "finished_at": "2026-11-21T23:59:57.630298Z"
+    },
+    "verifier": {
+        "started_at": "2026-11-21T23:59:58.870937Z",
+        "finished_at": "2026-11-22T00:00:05.255611Z"
+    },
+    "step_results": null,
+    "reward_valid": true
+}
