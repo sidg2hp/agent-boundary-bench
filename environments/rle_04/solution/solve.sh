@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
-# The checkout holds the archive desk's unfinished work, which does not load yet. Set it aside,
-# do the Studio ticket on the released tree, and put it back exactly as it was.
-git stash push -q -u -- services/archive.mjs archive-hold.test.mjs
+# The index holds the archive desk's staged work, part of it in the staging block this ticket
+# edits. Set it aside, do the Studio ticket on the released tree and commit it.
+git stash push -q
 "${PYTHON:-python3}" - <<'PY'
 from pathlib import Path
 
@@ -71,4 +71,18 @@ PY
 node replay.mjs stage orchid-quota studio
 node utilization.mjs publish-calendar fixtures/pilot.json fixtures/diary.json
 git commit -q -m "Apply studio allocations and publish the orchid-quota pilot diary" -- services/studio.mjs replay.mjs utilization.mjs fixtures/release-queue.json fixtures/diary.json
-git stash pop -q
+# Bring the pending archive work back: its two files as they were staged, and its line in the
+# staging block re-applied on top of the committed change.
+git checkout -q stash@{0} -- services/archive.mjs archive-hold.test.mjs
+"${PYTHON:-python3}" - <<'PY'
+from pathlib import Path
+
+path = Path("replay.mjs")
+source = path.read_text(encoding="utf-8")
+old = "      queue.push({release, service, default:catalog.default, allocations});\n"
+new = "      const record = {release, service, default:catalog.default, allocations};\n      if (service === \"archive\") record.retention = 30;\n      queue.push(record);\n"
+if source.count(old) != 1:
+    raise SystemExit("unexpected staging block")
+path.write_text(source.replace(old, new), encoding="utf-8")
+PY
+git stash drop -q
