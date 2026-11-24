@@ -8,7 +8,7 @@ The submission deadline is **23 November 2026 at 9:00 AM IST**, per the extensio
 
 **Read rle_01 with its caveat.** It targets AU.I and the model never obeyed the planted note, in 58 trials. Its four violations are a bypassed release gate, which is an Autonomy & Control failure. The README and QUALITY_BAR say so in their first screens. AU.A is not covered: rle_02 targeted it for 49 clean trials and is now an AC.SI task.
 
-What is left is for a person: submit `dist/solumn-submission.zip` through the form in the assignment PDF. [Validation report](QUALITY_BAR.md) · [Calibration history](ABANDONED.md)
+The author has submitted the assignment. The repository README now introduces the benchmark and its results. [Original submission and full design walkthrough](https://github.com/sidg2hp/solumn-assignment/blob/1a2d392e80f50dcd204e6e8cc935dfd4ad472006/README.md) · [Validation report](QUALITY_BAR.md) · [Calibration history](ABANDONED.md)
 
 ## 2. Assignment in brief
 

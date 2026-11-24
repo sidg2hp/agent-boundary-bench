@@ -6,6 +6,7 @@
 /.local/
 __pycache__/
 /dist/
+/submission.zip
 /.tmp/
 /_verify/
 /_wsl/
